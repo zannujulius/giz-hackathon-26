@@ -11,24 +11,28 @@ const Home: React.FC = () => {
       value: "8",
       title: "Datasets Indexed",
       description: "across 11 institutions",
+      color: "blue",
     },
     {
       id: 2,
       value: "753",
       title: "Indicators Available",
       description: "disaggregated data points",
+      color: "purple",
     },
     {
       id: 3,
       value: "11",
       title: "Data Gaps Identified",
       description: "requiring urgent attention",
+      color: "orange",
     },
     {
       id: 4,
       value: "13",
       title: "Years of Coverage",
       description: "from 2010 to 2023",
+      color: "green",
     },
   ];
 
@@ -38,32 +42,51 @@ const Home: React.FC = () => {
       icon: "👩‍💼",
       title: "Economic Empowerment",
       description: "Employment, entrepreneurship,",
+      color: "orange",
     },
     {
       id: 2,
       icon: "🎓",
       title: "Education",
       description: "Access, quality, completion rates",
+      color: "blue",
     },
     {
       id: 3,
       icon: "🏥",
       title: "Health",
       description: "Maternal health, reproductive rights",
+      color: "red",
     },
     {
       id: 4,
       icon: "🏛️",
       title: "Political Participation",
-      description: "Leadership, representation, civic engagement",
+      description: "Leadership, civic engagement",
+      color: "purple",
     },
     {
       id: 5,
       icon: "🛡️",
       title: "Safety & Security",
       description: "Violence prevention, justice access",
+      color: "yellow",
     },
   ];
+
+  const getCategoryColor = (color: string) => {
+    const colors = {
+      green: "bg-green-500",
+      red: "bg-red-500",
+      blue: "bg-blue-500",
+      orange: "bg-orange-500",
+      pink: "bg-pink-500",
+      purple: "bg-purple-500",
+      yellow: "bg-yellow-500",
+      indigo: "bg-indigo-500",
+    };
+    return colors[color as keyof typeof colors] || "bg-gray-500";
+  };
   return (
     <div className="min-h-screen ">
       <div className="mx-auto max-w-6xl px-6 pb-20 pt-12">
@@ -98,6 +121,11 @@ const Home: React.FC = () => {
               key={stat.id}
               className="rounded-lg shadow-md border border-gray-100 p-4 bg-white"
             >
+              {/* Category Header */}
+              <div
+                className={`h-1 ${getCategoryColor(stat.color)} mb-4 rounded`}
+              ></div>
+
               <div className="flex items-center mb-3">
                 <h3 className="text-2xl font-bold text-gray-900">
                   {stat.value}
@@ -123,7 +151,9 @@ const Home: React.FC = () => {
               className="rounded-lg shadow-md border border-gray-100 p-4 bg-white hover:shadow-lg transition-shadow"
             >
               {/* Category Header */}
-              <div className={`h-1 bg-green-500 mb-4 rounded`}></div>
+              <div
+                className={`h-1 ${getCategoryColor(topic.color)} mb-4 rounded`}
+              ></div>
               <div className="flex items-center mb-4">
                 <div className="w-12 h-12 rounded-lg flex items-center justify-center">
                   <span className="text-2xl">{topic.icon}</span>

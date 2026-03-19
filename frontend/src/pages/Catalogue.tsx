@@ -1,11 +1,16 @@
 import React, { useState } from "react";
-import { Input, Button, Typography, Tag, Card } from "antd";
-import { SearchOutlined, FilterOutlined } from "@ant-design/icons";
+import { Input, Button, Typography, Tag, Card, Select, Space } from "antd";
+import { SearchOutlined, CloseOutlined } from "@ant-design/icons";
 
 const { Title, Text } = Typography;
+const { Option } = Select;
 
 export const Catalogue = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
+  const [selectedAccessTypes, setSelectedAccessTypes] = useState<string[]>([]);
+  const [selectedProvinces, setSelectedProvinces] = useState<string[]>([]);
+  const [selectedYears, setSelectedYears] = useState<string[]>([]);
 
   const datasets = [
     {
@@ -22,6 +27,8 @@ export const Catalogue = () => {
         "Comprehensive household survey covering fertility, family planning, maternal and child health, nutrition...",
       tags: ["health", "fertility", "GBV", "nutrition", "HIV"],
       color: "green",
+      province: "Kigali",
+      year: "2019",
     },
     {
       id: 2,
@@ -43,6 +50,8 @@ export const Catalogue = () => {
         "survivor data",
       ],
       color: "red",
+      province: "Northern",
+      year: "2015",
     },
     {
       id: 3,
@@ -58,6 +67,8 @@ export const Catalogue = () => {
         "Annual school enrollment, dropout, transition, and completion rates disaggregated by sex, province...",
       tags: ["education", "girls", "enrollment", "dropout", "completion"],
       color: "blue",
+      province: "Eastern",
+      year: "2010",
     },
     {
       id: 4,
@@ -73,6 +84,8 @@ export const Catalogue = () => {
         "Tracks female labour force participation, business ownership, access to credit, mobile money adoption...",
       tags: ["economic", "employment", "business", "credit", "income"],
       color: "orange",
+      province: "Southern",
+      year: "2018",
     },
     {
       id: 5,
@@ -94,6 +107,8 @@ export const Catalogue = () => {
         "rural women",
       ],
       color: "pink",
+      province: "Western",
+      year: "2015",
     },
     {
       id: 6,
@@ -109,6 +124,8 @@ export const Catalogue = () => {
         "Tracks representation of women in parliament, cabinet, local government, judiciary, civil service, and...",
       tags: ["leadership", "parliament", "judiciary", "cabinet", "governance"],
       color: "purple",
+      province: "Kigali",
+      year: "2015",
     },
     {
       id: 7,
@@ -124,6 +141,8 @@ export const Catalogue = () => {
         "Comprehensive maternal health data including antenatal care, skilled birth attendance, maternal mortality...",
       tags: ["health", "maternal", "mortality", "antenatal", "birth"],
       color: "green",
+      province: "Northern",
+      year: "2010",
     },
     {
       id: 8,
@@ -139,8 +158,39 @@ export const Catalogue = () => {
         "Tracks female voter registration, turnout, candidacy rates, and electoral outcomes across national...",
       tags: ["political", "voting", "elections", "candidacy", "turnout"],
       color: "indigo",
+      province: "Eastern",
+      year: "2013",
     },
   ];
+
+  // Filter options
+  const topicOptions = [
+    "Education",
+    "Health",
+    "GBV",
+    "Economic",
+    "Political",
+    "Land Rights",
+    "Leadership",
+    "Justice",
+  ];
+  const accessTypeOptions = ["Open", "Request", "Purchase", "Restricted"];
+  const provinceOptions = [
+    "Kigali",
+    "Northern",
+    "Southern",
+    "Eastern",
+    "Western",
+  ];
+  const yearOptions = ["2010", "2013", "2015", "2018", "2019"];
+
+  // Clear filters function
+  const clearFilters = () => {
+    setSelectedTopics([]);
+    setSelectedAccessTypes([]);
+    setSelectedProvinces([]);
+    setSelectedYears([]);
+  };
 
   const getAccessColor = (access: string) => {
     return access === "Open Access" ? "green" : "orange";
@@ -159,12 +209,33 @@ export const Catalogue = () => {
     return colors[color as keyof typeof colors] || "bg-gray-500";
   };
 
-  const filteredDatasets = datasets.filter(
-    (dataset) =>
+  const filteredDatasets = datasets.filter((dataset) => {
+    const matchesSearch =
       dataset.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       dataset.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      dataset.institution.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+      dataset.institution.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesTopic =
+      selectedTopics.length === 0 || selectedTopics.includes(dataset.category);
+    const matchesAccess =
+      selectedAccessTypes.length === 0 ||
+      selectedAccessTypes.some((access) =>
+        dataset.access.toLowerCase().includes(access.toLowerCase()),
+      );
+    const matchesProvince =
+      selectedProvinces.length === 0 ||
+      selectedProvinces.includes(dataset.province);
+    const matchesYear =
+      selectedYears.length === 0 || selectedYears.includes(dataset.year);
+
+    return (
+      matchesSearch &&
+      matchesTopic &&
+      matchesAccess &&
+      matchesProvince &&
+      matchesYear
+    );
+  });
 
   return (
     <div className="min-h-screen ">
@@ -184,16 +255,120 @@ export const Catalogue = () => {
         <div className="mb-8 max-w-xl flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
             <Input
-              size="large"
+              size=""
               placeholder="Search by title, tag, or institution..."
               prefix={<SearchOutlined />}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <Button size="large" icon={<FilterOutlined />}>
-            Filters
-          </Button>
+          <Button className="text-gray-500 text-sm self-center">Filter</Button>
+        </div>
+
+        {/* Filter Sections */}
+        <div className="mb-8 p-4 bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="flex justify-between items-center mb-4">
+            {/* <Button type="link" onClick={clearFilters} icon={<CloseOutlined />}>
+              Clear All
+            </Button> */}
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {/* Topic Filter */}
+            <div>
+              <Text strong className="block mb-2">
+                TOPIC
+              </Text>
+              <Select
+                mode="multiple"
+                style={{ width: "100%" }}
+                placeholder="Select topics"
+                value={selectedTopics}
+                onChange={setSelectedTopics}
+                allowClear
+                size="middle"
+              >
+                {topicOptions.map((topic) => (
+                  <Option key={topic} value={topic}>
+                    {topic}
+                  </Option>
+                ))}
+              </Select>
+            </div>
+
+            {/* Access Type Filter */}
+            <div>
+              <Text strong className="block mb-2">
+                ACCESS TYPE
+              </Text>
+              <Select
+                mode="multiple"
+                style={{ width: "100%" }}
+                placeholder="Select access types"
+                value={selectedAccessTypes}
+                onChange={setSelectedAccessTypes}
+                allowClear
+                size="middle"
+              >
+                {accessTypeOptions.map((access) => (
+                  <Option key={access} value={access}>
+                    {access}
+                  </Option>
+                ))}
+              </Select>
+            </div>
+
+            {/* Province Filter */}
+            <div>
+              <Text strong className="block mb-2">
+                PROVINCE
+              </Text>
+              <Select
+                mode="multiple"
+                style={{ width: "100%" }}
+                placeholder="Select provinces"
+                value={selectedProvinces}
+                onChange={setSelectedProvinces}
+                allowClear
+                size="middle"
+              >
+                {provinceOptions.map((province) => (
+                  <Option key={province} value={province}>
+                    {province}
+                  </Option>
+                ))}
+              </Select>
+            </div>
+
+            {/* Year Filter */}
+            <div>
+              <Text strong className="block mb-2">
+                YEAR
+              </Text>
+              <Select
+                mode="multiple"
+                style={{ width: "100%" }}
+                placeholder="Select years"
+                value={selectedYears}
+                onChange={setSelectedYears}
+                allowClear
+                size="middle"
+              >
+                {yearOptions.map((year) => (
+                  <Option key={year} value={year}>
+                    {year}
+                  </Option>
+                ))}
+              </Select>
+            </div>
+          </div>
+
+          {/* Filter Summary */}
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <Text className="text-gray-600">
+              Showing {filteredDatasets.length} of {datasets.length} datasets
+            </Text>
+          </div>
         </div>
 
         {/* Dataset Grid */}
