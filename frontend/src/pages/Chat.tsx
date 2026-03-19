@@ -55,7 +55,53 @@ interface Dataset {
 }
 
 export const Chat = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: "1",
+      type: "user",
+      content:
+        "What are the trends in maternal health indicators over the past decade?",
+      timestamp: new Date(2024, 2, 19, 14, 30),
+      selectedDatasets: [
+        "Rwanda Demographic and Health Survey 2019-20",
+        "Maternal Health Indicators 2010-2023",
+      ],
+    },
+    {
+      id: "2",
+      type: "ai",
+      content:
+        "Based on the selected datasets, I can analyze maternal health trends in Rwanda from 2010-2023. The data shows significant improvements in key indicators over this period:\n\n• **Maternal mortality ratio** decreased from 540 deaths per 100,000 live births in 2010 to 248 in 2020\n• **Skilled birth attendance** increased from 69% to 91%\n• **Antenatal care coverage** (4+ visits) improved from 35% to 44%\n• **Postnatal care** within 48 hours rose from 34% to 42%\n\nThese improvements reflect Rwanda's strong commitment to maternal health through community health worker programs and improved healthcare infrastructure.",
+      timestamp: new Date(2024, 2, 19, 14, 31),
+      suggestedQuestions: [
+        "What factors contributed to the reduction in maternal mortality?",
+        "How do rural vs urban maternal health indicators compare?",
+        "What are the remaining challenges in maternal healthcare?",
+      ],
+    },
+    {
+      id: "3",
+      type: "user",
+      content: "How do rural vs urban maternal health indicators compare?",
+      timestamp: new Date(2024, 2, 19, 14, 33),
+      selectedDatasets: [
+        "Rwanda Demographic and Health Survey 2019-20",
+        "Maternal Health Indicators 2010-2023",
+      ],
+    },
+    {
+      id: "4",
+      type: "ai",
+      content:
+        "The data reveals significant disparities between rural and urban areas in maternal health outcomes:\n\n**Urban areas perform better across all indicators:**\n• Skilled birth attendance: 98% urban vs 89% rural\n• Antenatal care (4+ visits): 52% urban vs 41% rural  \n• Delivery in health facilities: 96% urban vs 88% rural\n• Postnatal care within 48 hours: 51% urban vs 39% rural\n\n**Key contributing factors:**\n- Geographic accessibility to health facilities\n- Transportation challenges in rural areas\n- Higher education levels in urban areas\n- Economic factors affecting healthcare seeking behavior\n\nHowever, the rural-urban gap has been narrowing over time, particularly in skilled birth attendance.",
+      timestamp: new Date(2024, 2, 19, 14, 34),
+      suggestedQuestions: [
+        "What interventions are helping close the rural-urban gap?",
+        "How does socioeconomic status affect maternal health outcomes?",
+        "What role do community health workers play in rural areas?",
+      ],
+    },
+  ]);
   const [inputValue, setInputValue] = useState("");
   const [selectedDatasets, setSelectedDatasets] = useState<string[]>([
     "Rwanda Demographic and Health Survey 2019-20",
@@ -366,13 +412,6 @@ export const Chat = () => {
                               </Text>
                             </div>
                           )}
-                      </div>
-
-                      <div className="flex items-center gap-2 mt-1">
-                        <ClockCircleOutlined className="text-xs text-gray-400" />
-                        <Text className="text-xs text-gray-400">
-                          {formatTime(message.timestamp)}
-                        </Text>
                       </div>
 
                       {message.suggestedQuestions && (
