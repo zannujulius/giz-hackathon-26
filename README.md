@@ -1,1 +1,0 @@
-# giz-hackathon-26
