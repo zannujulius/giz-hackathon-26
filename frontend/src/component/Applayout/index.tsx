@@ -50,10 +50,6 @@ const AppLayout: React.FC<AppLayoutProps> = () => {
       key: "3",
       label: "Logout",
       onClick: () => {
-        // Clear user data from Redux store
-        // You can dispatch an action to clear the user state here
-        // For example: dispatch(logoutUser());
-        // Then navigate to the login page
         navigate("/login"); // Redirect to login page
       },
     },

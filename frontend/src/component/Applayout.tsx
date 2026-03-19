@@ -44,11 +44,6 @@ const siderStyle: React.CSSProperties = {
 const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   const navItems: MenuProps["items"] = [
     {
-      key: "11",
-      icon: <MessageOutlined />,
-      label: <div className="rounded">Ask</div>,
-    },
-    {
       key: "1",
       icon: <UserOutlined />,
       label: (
@@ -111,6 +106,27 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     },
   ];
 
+  const chatItems = [
+    {
+      key: "datasources",
+      icon: <MessageOutlined />,
+      label: "Access chat",
+    },
+    // {
+    //   type: "divider" as const,
+    // },
+    {
+      key: "organization",
+      icon: <MessageOutlined />,
+      label: "Pregnancy and childbirth",
+    },
+    {
+      key: "team",
+      icon: <MessageOutlined />,
+      label: "Reproductive health",
+    },
+  ];
+
   const { Text, Title } = Typography;
   const navigate = useNavigate();
   const profileItems: MenuProps["items"] = [
@@ -148,13 +164,34 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
         className="flex flex-col p-2  bg-blue-200/10! border-gray-200 border-r-[.5px] relative"
       >
         <div className="demo-logo-vertical" />
-        <div className="border-2 border-white rounded h-12"></div>
+
+        <div className="border-2 bg-gradient-to-r rounded-md from-black via-blue-950 to-purple-800 border-white flex flex-col items-center justify-center rounded h-12 ">
+          <Text className="text-center text-white! text-lg! uppercase font-bold ">
+            uburinganire
+          </Text>
+        </div>
         <Menu
           // theme=""
           mode="inline"
           className="bg-transparent! border-none"
           defaultSelectedKeys={["4"]}
           items={navItems}
+        />
+        {/* Chats */}
+        <div className="flex items-center pb-1 border-b! border-gray-300  mt-2 mb-2 px-2">
+          <div className="uppercase text-[11px] font-semibold ml-2 ">
+            Chat history
+          </div>
+        </div>
+
+        {/* Chat Menu */}
+        <Menu
+          // theme=""
+          mode="inline"
+          className="bg-transparent! border-none"
+          defaultSelectedKeys={["4"]}
+          items={chatItems}
+          onClick={() => navigate("/chat")}
         />
         {/* User Section at Bottom */}
         <div className="w-full left-0 p-2 border-gray-200 absolute border bottom-0">
@@ -196,6 +233,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
           }}
         >
           <Text className="font-bold text-lg!">Welcome to the GBP!!</Text>
+          <Link to="/chat" className="underline! cursor-pointer">
+            Pregnancy and childbirth
+          </Link>
           <div className="">
             <Dropdown menu={{ items: profileItems }} trigger={["hover"]}>
               <a onClick={(e) => e.preventDefault()}>
