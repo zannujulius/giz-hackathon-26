@@ -114,12 +114,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             zIndex: 1,
           }}
         >
-          <div className="">Welcome to the GBP!!</div>
+          <div className="font-bold">Welcome to the GBP!!</div>
           <div className="">
             <Dropdown menu={{ items: profileItems }} trigger={["hover"]}>
               <a onClick={(e) => e.preventDefault()}>
                 <Space>
-                  <Avatar size={32} />
+                  <Avatar size={32} icon={"🧑‍🦱"} />
                   <p className=" m-0! mt-2 text-black p-0!">Demo User</p>
                   <DownOutlined
                     style={{
