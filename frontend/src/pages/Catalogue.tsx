@@ -248,11 +248,11 @@ export const Catalogue = () => {
     <div className="min-h-screen ">
       <div className="mx-auto max-w-6xl px-6 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <Title level={2} className="mb-2">
+        <div className="mb-8 bg-gradient-to-r from-black via-blue-950 to-purple-800 p-4 rounded-2xl ">
+          <Title level={2} className="mb-2 text-slate-50!">
             Data Catalog
           </Title>
-          <Text className="text-gray-600">
+          <Text className="text-slate-50!">
             {datasets.length} datasets available across Rwanda's gender data
             ecosystem
           </Text>
@@ -277,7 +277,7 @@ export const Catalogue = () => {
             icon={<MessageOutlined />}
             className="bg-blue-950! text-white! text-sm self-center"
           >
-            Ask Question
+            Explore with AI
           </Button>
         </div>
 

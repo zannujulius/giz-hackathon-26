@@ -243,24 +243,24 @@ export const Chat = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
         {/* Chat Interface */}
-        <div className="lg:col-span-3 flex flex-col h-[70vh] rounded-lg overflow-hidden">
+        <div className="lg:col-span-3 flex flex-col h-[75vh] rounded-lg overflow-hidden">
           <div className="flex flex-col h-full">
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {messages.length === 0 ? (
-                <div className="flex flex-col items-center justify-center min-h-100 p-8">
+                <div className="flex flex-col items-start justify-center min-h-100 p-8">
                   {/* Welcome Prompt */}
-                  <div className="text-center mb-8">
-                    <Title level={3} className="mb-4">
+                  <div className="text-center w-full! bg-gradient-to-r from-black via-blue-950 to-purple-800 p-4 rounded-2xl  mb-8">
+                    <Title level={2} className="mb-4 text-slate-50! text-start">
                       Welcome to Rwanda Gender Health Review
                     </Title>
-                    <Paragraph className="text-lg text-gray-600 mb-6 max-w-2xl">
+                    <Paragraph className="text-lg  text-slate-50! text-start mb-6 max-w-2xl">
                       Explore comprehensive gender and health data insights from
                       Rwanda. Ask questions about trends, patterns, and
                       relationships across multiple datasets to uncover
                       meaningful insights for advocacy and decision-making.
                     </Paragraph>
-                    <div className="flex flex-wrap justify-center gap-2 mb-6">
+                    <div className="flex flex-wrap items-start! text-start! justify-center gap-2 mb-6">
                       <Tag color="blue">📊 Data Analysis</Tag>
                       <Tag color="green">🏥 Health Indicators</Tag>
                       <Tag color="red">⚖️ Gender Equality</Tag>
@@ -431,7 +431,7 @@ export const Chat = () => {
       {/* Fixed Input Area at Bottom */}
       <div className="border-t-gray-200 bottom bg-white p-4">
         <div className="flex items-center justify-center w-full">
-          <div className="w-full max-w-2xl">
+          <div className="w-full max-w-4xl">
             <InputBox />
           </div>
         </div>

@@ -8,17 +8,22 @@ import {
   type MenuProps,
   Breadcrumb,
   theme,
+  Typography,
 } from "antd";
 import {
   DatabaseOutlined,
   DownOutlined,
+  LogoutOutlined,
   MessageOutlined,
+  SettingOutlined,
   UploadOutlined,
+  UsergroupAddOutlined,
   UserOutlined,
   VideoCameraOutlined,
 } from "@ant-design/icons";
 import { useSelector } from "react-redux";
 import { Link, Outlet, useNavigate } from "react-router-dom";
+import Title from "antd/es/typography/Title";
 
 type AppLayoutProps = {
   // children?: ReactNode;
@@ -64,7 +69,49 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       ),
     },
   ];
+  const userMenuItems = [
+    {
+      key: "profile",
+      icon: <UserOutlined />,
+      label: "Profile",
+    },
+    {
+      key: "settings",
+      icon: <SettingOutlined />,
+      label: "Settings",
+    },
+    {
+      type: "divider" as const,
+    },
+    {
+      key: "logout",
+      icon: <LogoutOutlined />,
+      label: "Sign out",
+      danger: true,
+    },
+  ];
+  const items = [
+    {
+      key: "datasources",
+      icon: <UserOutlined />,
+      label: "Datasources",
+    },
+    // {
+    //   type: "divider" as const,
+    // },
+    {
+      key: "organization",
+      icon: <SettingOutlined />,
+      label: "Organization",
+    },
+    {
+      key: "team",
+      icon: <UsergroupAddOutlined />,
+      label: "Team",
+    },
+  ];
 
+  const { Text, Title } = Typography;
   const navigate = useNavigate();
   const profileItems: MenuProps["items"] = [
     {
@@ -109,6 +156,35 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
           defaultSelectedKeys={["4"]}
           items={navItems}
         />
+        {/* User Section at Bottom */}
+        <div className="w-full left-0 p-2 border-gray-200 absolute border bottom-0">
+          <div className="">
+            <Menu
+              defaultSelectedKeys={["datasources"]}
+              className="bg-transparent!"
+              mode="inline"
+              items={items}
+            />
+          </div>
+          <Dropdown
+            menu={{ items: userMenuItems }}
+            trigger={["hover"]}
+            placement="topLeft"
+            overlayClassName="user-dropdown"
+          >
+            <div className="flex p-1 items-center justify-start overflow-hidden transition-colors">
+              <Avatar size={25} className="bg-black! "></Avatar>
+              <div className="overflow-hidden pl-2 flex-1 min-w-0">
+                <Text className="text-sm font-semibold leading-normal block truncate">
+                  Demo User
+                </Text>
+                <Text className="text-[12px] text-gray-500 block truncate">
+                  demouser@gmail.com
+                </Text>
+              </div>
+            </div>
+          </Dropdown>
+        </div>
       </Sider>
       <Layout>
         <Header
@@ -119,7 +195,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
             zIndex: 1,
           }}
         >
-          <div className="font-bold">Welcome to the GBP!!</div>
+          <Text className="font-bold text-lg!">Welcome to the GBP!!</Text>
           <div className="">
             <Dropdown menu={{ items: profileItems }} trigger={["hover"]}>
               <a onClick={(e) => e.preventDefault()}>

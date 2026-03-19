@@ -90,16 +90,16 @@ const Home: React.FC = () => {
   return (
     <div className="min-h-screen ">
       <div className="mx-auto max-w-6xl px-6 pb-20 pt-12">
-        <div className="grid gap-10 lg:grid-cols-1">
+        <div className="grid bg-gradient-to-r from-black via-blue-950 to-purple-800 p-4 rounded-2xl gap-10 lg:grid-cols-1">
           <div>
             <Tag color={"green"} className="i">
               Gender Data Resource Discovery
             </Tag>
-            <h1 className="mt-6 text-4xl font-semibold leading-tight sm:text-5xl">
+            <h1 className="mt-6 text-4xl text-slate-50 font-semibold leading-tight sm:text-5xl">
               Find, understand, and use gender data across Rwanda to power
               stronger advocacy.
             </h1>
-            <p className="mt-4 text-lg ">
+            <p className="mt-4 text-lg text-slate-50 ">
               A single place to locate gender-focused datasets, understand
               access pathways, and surface gaps or trends so researchers,
               journalists, civil society, and the public can act with
