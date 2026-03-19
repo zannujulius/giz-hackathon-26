@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import { Input, Button, Typography, Tag, Card, Select, Space } from "antd";
-import { SearchOutlined, CloseOutlined } from "@ant-design/icons";
+import {
+  SearchOutlined,
+  CloseOutlined,
+  MessageOutlined,
+} from "@ant-design/icons";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -252,17 +256,25 @@ export const Catalogue = () => {
         </div>
 
         {/* Search and Filters */}
-        <div className="mb-8 max-w-xl flex flex-col sm:flex-row gap-4">
-          <div className="flex-1">
+        <div className="mb-8 flex items-start justify-between gap-4">
+          <div className="max-w-sm flex items-center gap-2">
             <Input
-              size=""
               placeholder="Search by title, tag, or institution..."
               prefix={<SearchOutlined />}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
+            <Button className="text-gray-500 text-sm self-center">
+              Filter
+            </Button>
           </div>
-          <Button className="text-gray-500 text-sm self-center">Filter</Button>
+
+          <Button
+            icon={<MessageOutlined />}
+            className="bg-blue-950! text-white! text-sm self-center"
+          >
+            Ask Question
+          </Button>
         </div>
 
         {/* Filter Sections */}
