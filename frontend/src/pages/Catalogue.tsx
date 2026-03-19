@@ -5,6 +5,7 @@ import {
   CloseOutlined,
   MessageOutlined,
 } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -241,6 +242,8 @@ export const Catalogue = () => {
     );
   });
 
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen ">
       <div className="mx-auto max-w-6xl px-6 py-8">
@@ -270,6 +273,7 @@ export const Catalogue = () => {
           </div>
 
           <Button
+            onClick={() => navigate("/chat")}
             icon={<MessageOutlined />}
             className="bg-blue-950! text-white! text-sm self-center"
           >

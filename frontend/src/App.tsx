@@ -3,6 +3,7 @@ import Home from "./pages/Home";
 import "./App.css";
 import AppLayout from "./component/Applayout";
 import { Catalogue } from "./pages/Catalogue";
+import { Chat } from "./pages/Chat";
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
         <Route path="/" element={<AppLayout />}>
           <Route index element={<Home />} />
           <Route path="/catalogue" element={<Catalogue />} />
+          <Route path="/chat" element={<Chat />} />
           <Route path="*" element={<div>Page Not Found</div>} />
         </Route>
       </Routes>
