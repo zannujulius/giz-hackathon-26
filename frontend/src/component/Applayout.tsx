@@ -19,7 +19,7 @@ import { useSelector } from "react-redux";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 
 type AppLayoutProps = {
-  children?: ReactNode;
+  // children?: ReactNode;
 };
 
 const { Header, Content, Footer, Sider } = Layout;
@@ -34,14 +34,14 @@ const siderStyle: React.CSSProperties = {
   scrollbarGutter: "stable",
 };
 
-const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
+const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   const navItems: MenuProps["items"] = [
     {
       key: "1",
       icon: <UserOutlined />,
       label: (
         <div className="rounded">
-          <Link target="_blank" rel="noopener noreferrer" to="/">
+          <Link target="" to="/">
             Dashboard
           </Link>
         </div>
@@ -52,9 +52,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       icon: <UserOutlined />,
       label: (
         <div className="rounded">
-          <Link target="_blank" rel="noopener noreferrer" to="/">
-            Catalogue
-          </Link>
+          <Link to="/catalogue">Catalogue</Link>
         </div>
       ),
     },
@@ -96,7 +94,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         className="overflow h-full p-2 bg-blue-950! sticky top-0"
       >
         <div className="demo-logo-vertical" />
-        <div className="border-2  border-white rounded h-12"></div>
+        <div className="border-2 border-white rounded h-12"></div>
         <Menu
           // theme=""
           mode="inline"
@@ -133,7 +131,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           </div>
         </Header>
         <Content style={{ margin: "24px 16px 0", overflow: "initial" }}>
-          {children}
+          <Outlet />
         </Content>
         <Footer className="sticky! bottom-0" style={{ textAlign: "center" }}>
           FAST ©{new Date().getFullYear()} Created by Hackathon
