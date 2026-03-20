@@ -23,6 +23,7 @@ import {
   BellOutlined,
 } from "@ant-design/icons";
 import { Link, Outlet, useNavigate } from "react-router-dom";
+import { ChatMenu } from "./ChatMenu";
 
 type AppLayoutProps = {
   // children?: ReactNode;
@@ -128,27 +129,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     },
   ];
 
-  const chatItems = [
-    {
-      key: "datasources",
-      icon: <MessageOutlined />,
-      label: "Access chat",
-    },
-    // {
-    //   type: "divider" as const,
-    // },
-    {
-      key: "organization",
-      icon: <MessageOutlined />,
-      label: "Pregnancy and childbirth",
-    },
-    {
-      key: "team",
-      icon: <MessageOutlined />,
-      label: "Reproductive health",
-    },
-  ];
-
   const { Text } = Typography;
   const navigate = useNavigate();
   const profileItems: MenuProps["items"] = [
@@ -186,8 +166,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
         className="flex flex-col p-2  bg-blue-200/10! border-gray-200 border-r-[.5px] relative"
       >
         <div className="demo-logo-vertical" />
-        {/* bg-gradient-to-r rounded-md from-black via-blue-950 to-purple-800 text-white!  */}
-        <div className="border-2 border-white flex flex-col items-center justify-center rounded h-12 ">
+        {/* Logo */}
+        <div className="border-[1.5px] border-white flex flex-col items-center justify-center rounded h-12 ">
           <Text className="text-center text-lg! uppercase font-bold ">
             uburinganire
           </Text>
@@ -206,14 +186,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
           </div>
         </div>
         {/* Chat Menu */}
-        <Menu
-          // theme=""
-          mode="inline"
-          className="bg-transparent! border-none"
-          defaultSelectedKeys={["4"]}
-          items={chatItems}
-          onClick={() => navigate("/chat")}
-        />
+        <ChatMenu />
         {/* User Section at Bottom */}
         <div className="w-full left-0 p-2 border-gray-200 absolute border bottom-0">
           <div className="">

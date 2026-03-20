@@ -119,3 +119,14 @@
   background-color: rgb(234, 234, 234) !important;
   color: black !important;
 }
+
+* {
+  /* For Chrome, Safari, and Opera */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* For Internet Explorer, Edge, and Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
