@@ -41,6 +41,50 @@ npm install
 npm run dev
 ```
 
+## Platform Features
+
+### Home
+
+Dashboard overview with key gender statistics and quick access to recent resources and trending topics.
+
+### Catalogue
+
+Comprehensive data explorer with semantic search capabilities for browsing through 500+ gender-related resources from DHS, World Bank, and development institutions.
+
+### Chat
+
+AI-powered conversational interface that allows natural language queries about gender data, providing instant insights with interactive visualizations and charts.
+
+### Insights
+
+Interactive analytics dashboards featuring DHS Gender Data, World Bank Indicators, and Survey Analytics with customizable charts and trend analysis.
+
+## Use Cases
+
+### Pro-Femmes Twese Hamwe
+
+**Scenario**: Preparing evidence-based advocacy materials for peacebuilding initiatives
+<br>
+**Platform Use**: Search the Catalogue for women's participation data in peace processes across regions, then use Chat to query "trends in women's political participation in post-conflict settings" to generate compelling visuals for policy briefs.
+
+### Rwanda Women's Network (RWN)
+
+**Scenario**: Designing socio-economic empowerment programs based on current data
+<br>
+**Platform Use**: Access Insights dashboard to analyze economic indicators by gender, then use Chat to ask "What are the key barriers to women's entrepreneurship in Rwanda?" to identify program focus areas with supporting data visualizations.
+
+### Rwanda Men's Resource Center (RWAMREC)
+
+**Scenario**: Developing male engagement strategies for GBV prevention campaigns  
+<br>
+**Platform Use**: Search Catalogue for masculinity and GBV prevention studies, then query Chat with "effective approaches for engaging men in gender equality" to access research-backed methodologies with trend analysis.
+
+### Haguruka NGO
+
+**Scenario**: Monitoring legal reform impact on women's rights
+<br>
+**Platform Use**: Use Insights to track women's legal empowerment indicators over time, then Chat to analyze "impact of legal reforms on women's property rights" with interactive charts showing before/after comparisons.
+
 ## Architecture
 
 - **Frontend**: React TypeScript with Ant Design and Recharts
