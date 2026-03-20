@@ -22,6 +22,7 @@ import {
 } from "@ant-design/icons";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { publications, TOPIC_COLORS } from "../data/publications";
+import { advancedSearch } from "../utils/semanticSearch";
 
 const { Title, Text } = Typography;
 
@@ -110,17 +111,22 @@ export const Catalogue = () => {
     [],
   );
 
-  // Filtered results
+  // Filtered results with semantic search
   const results = useMemo(() => {
-    const q = query.toLowerCase();
-    return publications.filter((p) => {
-      if (
-        q &&
-        !p.title.toLowerCase().includes(q) &&
-        !p.topicCategory.toLowerCase().includes(q) &&
-        !p.sourceInstitution.toLowerCase().includes(q)
-      )
-        return false;
+    // Start with all publications
+    let filteredPubs = publications;
+    
+    // Apply semantic search if there's a query
+    if (query.trim()) {
+      filteredPubs = advancedSearch(filteredPubs, query, {
+        useSemanticSearch: true,
+        useFuzzyMatch: true,
+        threshold: 0.1
+      });
+    }
+    
+    // Apply other filters
+    return filteredPubs.filter((p) => {
       if (activeTopic && p.topicCategory !== activeTopic) return false;
       if (contentType !== "All" && p.contentType !== contentType) return false;
       if (years.length && !years.includes(p.year)) return false;
@@ -148,7 +154,7 @@ export const Catalogue = () => {
             <Input
               size="large"
               prefix={<SearchOutlined className="text-gray-400 text-base" />}
-              placeholder="Search publications, laws, reports, guidelines…"
+              placeholder="Smart search: find similar topics, themes, or content…"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               allowClear
