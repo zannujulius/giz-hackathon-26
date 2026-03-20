@@ -158,7 +158,7 @@ export function advancedSearch<T extends SearchableItem>(
   
   if (useSemanticSearch) {
     const semanticResults = semanticSearch(items, query, threshold);
-    return semanticResults.map(({ score, ...item }) => item as T);
+    return semanticResults.map(({ score, ...item }) => item as unknown as T);
   }
   
   // Fallback to enhanced exact + fuzzy matching
