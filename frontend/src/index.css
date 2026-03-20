@@ -1,0 +1,121 @@
+@import "tailwindcss";
+
+/* Custom color variables */
+:root {
+  --color-primary: #0586b5;
+  --color-primary-50: #f0f9ff;
+  --color-primary-100: #e0f2fe;
+  --color-primary-200: #bae6fd;
+  --color-primary-300: #7dd3fc;
+  --color-primary-400: #38bdf8;
+  --color-primary-500: #0586b5;
+  --color-primary-600: #0369a1;
+  --color-primary-700: #0284c7;
+  --color-primary-800: #075985;
+  --color-primary-900: #0c4a6e;
+  --color-primary-950: #082f49;
+}
+
+/* Register colors with Tailwind */
+@theme {
+  --color-primary: var(--color-primary);
+  --color-primary-50: var(--color-primary-50);
+  --color-primary-100: var(--color-primary-100);
+  --color-primary-200: var(--color-primary-200);
+  --color-primary-300: var(--color-primary-300);
+  --color-primary-400: var(--color-primary-400);
+  --color-primary-500: var(--color-primary-500);
+  --color-primary-600: var(--color-primary-600);
+  --color-primary-700: var(--color-primary-700);
+  --color-primary-800: var(--color-primary-800);
+  --color-primary-900: var(--color-primary-900);
+  --color-primary-950: var(--color-primary-950);
+}
+
+/* 
+* {
+  background-color: black !important;
+} */
+.ant-menu-item {
+  padding-left: 10px !important;
+}
+
+:where(.css-dev-only-do-not-override-1rocbtd).ant-menu-light
+  .ant-menu-item-selected,
+:where(.css-dev-only-do-not-override-1rocbtd).ant-menu-light
+  > .ant-menu
+  .ant-menu-item-selected {
+  background-color: transparent !important;
+  /* background: transparent !important; */
+}
+
+:where(.css-dev-only-do-not-override-1rocbtd).ant-menu-light
+  .ant-menu-item-selected,
+:where(.css-dev-only-do-not-override-1rocbtd).ant-menu-light
+  > .ant-menu
+  .ant-menu-item-selected {
+  color: black !important;
+}
+
+:where(
+    .css-dev-only-do-not-override-1rocbtd
+  ).ant-menu-light.ant-menu-root.ant-menu-inline,
+:where(.css-dev-only-do-not-override-1rocbtd).ant-menu-light
+  > .ant-menu.ant-menu-root.ant-menu-inline,
+:where(
+    .css-dev-only-do-not-override-1rocbtd
+  ).ant-menu-light.ant-menu-root.ant-menu-vertical,
+:where(.css-dev-only-do-not-override-1rocbtd).ant-menu-light
+  > .ant-menu.ant-menu-root.ant-menu-vertical {
+  border-inline-end: 0 !important;
+}
+
+.ant-menu-submenu-title {
+  padding-left: 10px !important;
+}
+
+.ant-menu-item.ant-menu-item-selected {
+  padding-left: 10px !important;
+}
+
+.ant-menu.ant-menu-sub.ant-menu-inline {
+  background: transparent !important;
+}
+
+.ant-menu-item.ant-menu-item-only-child {
+  padding-left: 20px !important;
+}
+
+.ant-col.ant-form-item-label.css-dev-only-do-not-override-1rocbtd {
+  display: block !important;
+}
+
+.ant-menu-item-group {
+  margin-top: -25px !important;
+}
+
+:where(.css-dev-only-do-not-override-1rocbtd).ant-layout-footer {
+  padding: 24px 40px !important;
+}
+
+:where(
+    .css-dev-only-do-not-override-pjc478
+  ).ant-menu-light.ant-menu-root.ant-menu-inline,
+:where(.css-dev-only-do-not-override-pjc478).ant-menu-light
+  > .ant-menu.ant-menu-root.ant-menu-inline,
+:where(
+    .css-dev-only-do-not-override-pjc478
+  ).ant-menu-light.ant-menu-root.ant-menu-vertical,
+:where(.css-dev-only-do-not-override-pjc478).ant-menu-light
+  > .ant-menu.ant-menu-root.ant-menu-vertical {
+  border-inline-end: 0 !important;
+}
+
+:where(.css-dev-only-do-not-override-pjc478).ant-menu-light
+  .ant-menu-item-selected,
+:where(.css-dev-only-do-not-override-pjc478).ant-menu-light
+  > .ant-menu
+  .ant-menu-item-selected {
+  background-color: rgb(234, 234, 234) !important;
+  color: black !important;
+}
