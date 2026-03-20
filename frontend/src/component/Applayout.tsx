@@ -12,14 +12,13 @@ import {
 } from "antd";
 import {
   DatabaseOutlined,
+  BarChartOutlined,
   DownOutlined,
   LogoutOutlined,
   MessageOutlined,
   SettingOutlined,
-  UploadOutlined,
   UsergroupAddOutlined,
   UserOutlined,
-  VideoCameraOutlined,
 } from "@ant-design/icons";
 import { useSelector } from "react-redux";
 import { Link, Outlet, useNavigate } from "react-router-dom";
@@ -60,6 +59,15 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       label: (
         <div className="rounded">
           <Link to="/catalogue">Catalogue</Link>
+        </div>
+      ),
+    },
+    {
+      key: "3",
+      icon: <BarChartOutlined />,
+      label: (
+        <div className="rounded">
+          <Link to="/insights">Insights</Link>
         </div>
       ),
     },

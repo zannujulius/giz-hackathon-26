@@ -1,77 +1,50 @@
 import React from "react";
 import { Button, Tag, Typography } from "antd";
-import { InputBox } from "../component/Input/InputBox";
 
 const Home: React.FC = () => {
-  const { Text, Title } = Typography;
+  const { Title } = Typography;
 
   const repositoryStats = [
     {
       id: 1,
-      value: "8",
-      title: "Datasets Indexed",
-      description: "across 11 institutions",
+      value: "43",
+      title: "Publications Indexed",
+      description: "across 9 government institutions",
       color: "blue",
     },
     {
       id: 2,
-      value: "753",
-      title: "Indicators Available",
-      description: "disaggregated data points",
+      value: "9",
+      title: "Topic Categories",
+      description: "incl. GBV, Gender Equality, Statistics",
       color: "purple",
     },
     {
       id: 3,
-      value: "11",
-      title: "Data Gaps Identified",
-      description: "requiring urgent attention",
+      value: "26",
+      title: "PDF Documents",
+      description: "laws, policies, reports & guidelines",
       color: "orange",
     },
     {
       id: 4,
-      value: "13",
+      value: "15",
       title: "Years of Coverage",
-      description: "from 2010 to 2023",
+      description: "from 2012 to 2026",
       color: "green",
     },
   ];
 
   const dataTopics = [
-    {
-      id: 1,
-      icon: "👩‍💼",
-      title: "Economic Empowerment",
-      description: "Employment, entrepreneurship,",
-      color: "orange",
-    },
-    {
-      id: 2,
-      icon: "🎓",
-      title: "Education",
-      description: "Access, quality, completion rates",
-      color: "blue",
-    },
-    {
-      id: 3,
-      icon: "🏥",
-      title: "Health",
-      description: "Maternal health, reproductive rights",
-      color: "red",
-    },
-    {
-      id: 4,
-      icon: "🏛️",
-      title: "Political Participation",
-      description: "Leadership, civic engagement",
-      color: "purple",
-    },
-    {
-      id: 5,
-      icon: "🛡️",
-      title: "Safety & Security",
-      description: "Violence prevention, justice access",
-      color: "yellow",
-    },
+    { id: 1, icon: "⚖️",  title: "Gender Equality",       description: "Policies, laws & mainstreaming strategies",  color: "purple", count: 14 },
+    { id: 2, icon: "🚨",  title: "Gender-Based Violence",  description: "Prevention, legal frameworks & response",     color: "red",    count: 10 },
+    { id: 3, icon: "📊",  title: "Gender Statistics",      description: "District-level gender profile reports",       color: "blue",   count: 9  },
+    { id: 4, icon: "👶",  title: "Child Protection",       description: "Child rights, online safety & labour",        color: "orange", count: 3  },
+    { id: 5, icon: "👩‍💼", title: "Women Empowerment",      description: "Economic development & leadership",           color: "green",  count: 2  },
+    { id: 6, icon: "🤝",  title: "Social Protection",      description: "Family welfare & social safety nets",         color: "indigo", count: 2  },
+    { id: 7, icon: "🏛️",  title: "Governance",             description: "Women in leadership & local government",      color: "pink",   count: 1  },
+    { id: 8, icon: "📣",  title: "Gender Promotion",       description: "Family promotion & child rights",             color: "yellow", count: 1  },
+    { id: 9, icon: "🌍",  title: "Gender Commitments",     description: "International monitoring & reporting",        color: "green",  count: 1  },
   ];
 
   const getCategoryColor = (color: string) => {
@@ -158,10 +131,15 @@ const Home: React.FC = () => {
                 <div className="w-12 h-12 rounded-lg flex items-center justify-center">
                   <span className="text-2xl">{topic.icon}</span>
                 </div>
-                <div className="ml-4">
-                  <h3 className="text-lg font-semibold text-gray-800">
-                    {topic.title}
-                  </h3>
+                <div className="ml-4 flex-1">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      {topic.title}
+                    </h3>
+                    <span className="text-xs font-medium text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+                      {topic.count}
+                    </span>
+                  </div>
                   <p className="text-sm text-gray-500">{topic.description}</p>
                 </div>
               </div>

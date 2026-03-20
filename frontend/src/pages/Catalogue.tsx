@@ -1,472 +1,362 @@
-import React, { useState } from "react";
-import { Input, Button, Typography, Tag, Card, Select, Space } from "antd";
+import { useState, useMemo } from "react";
+import { Input, Button, Typography, Tag, Select, Segmented, Empty, Tooltip } from "antd";
 import {
   SearchOutlined,
-  CloseOutlined,
+  FilePdfOutlined,
+  GlobalOutlined,
+  DownloadOutlined,
+  ArrowRightOutlined,
   MessageOutlined,
+  CloseOutlined,
+  AppstoreOutlined,
+  UnorderedListOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
+import { publications, TOPIC_COLORS } from "../data/publications";
 
 const { Title, Text } = Typography;
-const { Option } = Select;
 
+// ─── Static filter options derived from data ──────────────────────────────────
+const allTopics = [...new Set(publications.map((p) => p.topicCategory))].sort();
+const allYears   = [...new Set(publications.map((p) => p.year).filter(Boolean))].sort((a, b) => Number(b) - Number(a));
+const allProvinces = [...new Set(publications.flatMap((p) => p.province.split(";").map((s) => s.trim())))].sort();
+const allInstitutions = [...new Set(publications.map((p) => p.sourceInstitution))].sort();
+
+// Dot color per topic (CSS hex values)
+const TOPIC_DOT: Record<string, string> = {
+  "Gender Equality":       "#7c3aed",
+  "Gender-Based Violence": "#dc2626",
+  "Gender Statistics":     "#2563eb",
+  "Child Protection":      "#ea580c",
+  "Women Empowerment":     "#16a34a",
+  "Social Protection":     "#0891b2",
+  "Governance":            "#4f46e5",
+  "Gender Promotion":      "#db2777",
+  "Gender Commitments":    "#e11d48",
+};
+
+type ViewMode = "list" | "grid";
+
+// ─── Main component ───────────────────────────────────────────────────────────
 export const Catalogue = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
-  const [selectedAccessTypes, setSelectedAccessTypes] = useState<string[]>([]);
-  const [selectedProvinces, setSelectedProvinces] = useState<string[]>([]);
-  const [selectedYears, setSelectedYears] = useState<string[]>([]);
-
-  const datasets = [
-    {
-      id: 1,
-      title: "Rwanda Demographic and Health Survey 2019-20",
-      category: "Health",
-      access: "Open Access",
-      indicatorCount: 148,
-      institution: "NISR",
-      dateRange: "2019-2020",
-      scope: "national",
-      formats: ["CSV", "PDF", "SPSS"],
-      description:
-        "Comprehensive household survey covering fertility, family planning, maternal and child health, nutrition...",
-      tags: ["health", "fertility", "GBV", "nutrition", "HIV"],
-      color: "green",
-      province: "Kigali",
-      year: "2019",
-    },
-    {
-      id: 2,
-      title: "Rwanda Gender-Based Violence Statistics 2015-2023",
-      category: "GBV",
-      access: "Request Access",
-      indicatorCount: 62,
-      institution: "MIGEPROF",
-      dateRange: "2015-2023",
-      scope: "provincial",
-      formats: ["PDF", "Excel"],
-      description:
-        "Annual GBV case reporting from police, one-stop centres, and district hospitals. Disaggregated by type...",
-      tags: [
-        "GBV",
-        "domestic violence",
-        "sexual violence",
-        "femicide",
-        "survivor data",
-      ],
-      color: "red",
-      province: "Northern",
-      year: "2015",
-    },
-    {
-      id: 3,
-      title: "Girls Education Tracking & Completion Rates 2010-2023",
-      category: "Education",
-      access: "Open Access",
-      indicatorCount: 204,
-      institution: "MINEDUC",
-      dateRange: "2010-2023",
-      scope: "district",
-      formats: ["CSV", "Excel", "PDF"],
-      description:
-        "Annual school enrollment, dropout, transition, and completion rates disaggregated by sex, province...",
-      tags: ["education", "girls", "enrollment", "dropout", "completion"],
-      color: "blue",
-      province: "Eastern",
-      year: "2010",
-    },
-    {
-      id: 4,
-      title: "Women Economic Empowerment Indicators 2018-2023",
-      category: "Economic",
-      access: "Open Access",
-      indicatorCount: 88,
-      institution: "MIGEPROF",
-      dateRange: "2018-2023",
-      scope: "provincial",
-      formats: ["CSV", "PDF"],
-      description:
-        "Tracks female labour force participation, business ownership, access to credit, mobile money adoption...",
-      tags: ["economic", "employment", "business", "credit", "income"],
-      color: "orange",
-      province: "Southern",
-      year: "2018",
-    },
-    {
-      id: 5,
-      title: "Female Land Ownership and Registration 2015-2022",
-      category: "Land Rights",
-      access: "Request Access",
-      indicatorCount: 45,
-      institution: "RLMUA",
-      dateRange: "2015-2022",
-      scope: "district",
-      formats: ["PDF", "Excel"],
-      description:
-        "Tracks proportion of land titles registered under female names, jointly held land, and women with...",
-      tags: [
-        "land rights",
-        "property",
-        "titling",
-        "legal rights",
-        "rural women",
-      ],
-      color: "pink",
-      province: "Western",
-      year: "2015",
-    },
-    {
-      id: 6,
-      title: "Women in Leadership and Decision-Making Positions 2015-2023",
-      category: "Leadership",
-      access: "Open Access",
-      indicatorCount: 56,
-      institution: "RGB",
-      dateRange: "2015-2023",
-      scope: "national",
-      formats: ["PDF", "Excel"],
-      description:
-        "Tracks representation of women in parliament, cabinet, local government, judiciary, civil service, and...",
-      tags: ["leadership", "parliament", "judiciary", "cabinet", "governance"],
-      color: "purple",
-      province: "Kigali",
-      year: "2015",
-    },
-    {
-      id: 7,
-      title: "Maternal Health Indicators 2010-2023",
-      category: "Health",
-      access: "Open Access",
-      indicatorCount: 112,
-      institution: "MOH",
-      dateRange: "2010-2023",
-      scope: "district",
-      formats: ["CSV", "PDF"],
-      description:
-        "Comprehensive maternal health data including antenatal care, skilled birth attendance, maternal mortality...",
-      tags: ["health", "maternal", "mortality", "antenatal", "birth"],
-      color: "green",
-      province: "Northern",
-      year: "2010",
-    },
-    {
-      id: 8,
-      title: "Female Political Participation & Voter Data 2013-2023",
-      category: "Political",
-      access: "Open Access",
-      indicatorCount: 38,
-      institution: "NEC",
-      dateRange: "2013-2023",
-      scope: "district",
-      formats: ["PDF", "Excel"],
-      description:
-        "Tracks female voter registration, turnout, candidacy rates, and electoral outcomes across national...",
-      tags: ["political", "voting", "elections", "candidacy", "turnout"],
-      color: "indigo",
-      province: "Eastern",
-      year: "2013",
-    },
-  ];
-
-  // Filter options
-  const topicOptions = [
-    "Education",
-    "Health",
-    "GBV",
-    "Economic",
-    "Political",
-    "Land Rights",
-    "Leadership",
-    "Justice",
-  ];
-  const accessTypeOptions = ["Open", "Request", "Purchase", "Restricted"];
-  const provinceOptions = [
-    "Kigali",
-    "Northern",
-    "Southern",
-    "Eastern",
-    "Western",
-  ];
-  const yearOptions = ["2010", "2013", "2015", "2018", "2019"];
-
-  // Clear filters function
-  const clearFilters = () => {
-    setSelectedTopics([]);
-    setSelectedAccessTypes([]);
-    setSelectedProvinces([]);
-    setSelectedYears([]);
-  };
-
-  const getAccessColor = (access: string) => {
-    return access === "Open Access" ? "green" : "orange";
-  };
-
-  const getCategoryColor = (color: string) => {
-    const colors = {
-      green: "bg-green-500",
-      red: "bg-red-500",
-      blue: "bg-blue-500",
-      orange: "bg-orange-500",
-      pink: "bg-pink-500",
-      purple: "bg-purple-500",
-      indigo: "bg-indigo-500",
-    };
-    return colors[color as keyof typeof colors] || "bg-gray-500";
-  };
-
-  const filteredDatasets = datasets.filter((dataset) => {
-    const matchesSearch =
-      dataset.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      dataset.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      dataset.institution.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesTopic =
-      selectedTopics.length === 0 || selectedTopics.includes(dataset.category);
-    const matchesAccess =
-      selectedAccessTypes.length === 0 ||
-      selectedAccessTypes.some((access) =>
-        dataset.access.toLowerCase().includes(access.toLowerCase()),
-      );
-    const matchesProvince =
-      selectedProvinces.length === 0 ||
-      selectedProvinces.includes(dataset.province);
-    const matchesYear =
-      selectedYears.length === 0 || selectedYears.includes(dataset.year);
-
-    return (
-      matchesSearch &&
-      matchesTopic &&
-      matchesAccess &&
-      matchesProvince &&
-      matchesYear
-    );
-  });
-
   const navigate = useNavigate();
 
+  const [query, setQuery]                 = useState("");
+  const [activeTopic, setActiveTopic]     = useState<string | null>(null);
+  const [years, setYears]                 = useState<string[]>([]);
+  const [provinces, setProvinces]         = useState<string[]>([]);
+  const [institutions, setInstitutions]   = useState<string[]>([]);
+  const [contentType, setContentType]     = useState<"All" | "PDF" | "Web Page">("All");
+  const [view, setView]                   = useState<ViewMode>("list");
+
+  const hasFilters = !!query || !!activeTopic || years.length > 0 || provinces.length > 0 || institutions.length > 0 || contentType !== "All";
+
+  const clearAll = () => {
+    setQuery(""); setActiveTopic(null); setYears([]); setProvinces([]); setInstitutions([]); setContentType("All");
+  };
+
+  // Topic counts for pills
+  const topicCounts = useMemo(() =>
+    Object.fromEntries(allTopics.map((t) => [t, publications.filter((p) => p.topicCategory === t).length])),
+  []);
+
+  // Filtered results
+  const results = useMemo(() => {
+    const q = query.toLowerCase();
+    return publications.filter((p) => {
+      if (q && !p.title.toLowerCase().includes(q) && !p.topicCategory.toLowerCase().includes(q) && !p.sourceInstitution.toLowerCase().includes(q)) return false;
+      if (activeTopic && p.topicCategory !== activeTopic) return false;
+      if (contentType !== "All" && p.contentType !== contentType) return false;
+      if (years.length && !years.includes(p.year)) return false;
+      if (provinces.length && !provinces.some((pv) => p.province.includes(pv))) return false;
+      if (institutions.length && !institutions.includes(p.sourceInstitution)) return false;
+      return true;
+    });
+  }, [query, activeTopic, contentType, years, provinces, institutions]);
+
   return (
-    <div className="min-h-screen ">
-      <div className="mx-auto max-w-6xl px-6 py-8">
-        {/* Header */}
-        <div className="mb-8 bg-gradient-to-r from-black via-blue-950 to-purple-800 p-4 rounded-2xl ">
-          <Title level={2} className="mb-2 text-slate-50!">
+    <div className="min-h-screen bg-gray-50">
+
+      {/* ── Hero search ─────────────────────────────────────────────────────── */}
+      <div className="bg-gradient-to-r from-black via-blue-950 to-purple-800 px-6 pt-10 pb-8">
+        <div className="max-w-3xl mx-auto text-center">
+          <Text className="text-purple-300! text-xs! uppercase tracking-widest block mb-2">
+            Rwanda Gender Data Ecosystem
+          </Text>
+          <Title level={2} className="text-white! mb-4!">
             Data Catalog
           </Title>
-          <Text className="text-slate-50!">
-            {datasets.length} datasets available across Rwanda's gender data
-            ecosystem
+          <Input
+            size="large"
+            prefix={<SearchOutlined className="text-gray-400 text-base" />}
+            placeholder="Search publications, laws, reports, guidelines…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            allowClear
+            className="rounded-xl! shadow-lg text-base"
+            style={{ height: 48 }}
+          />
+          <Text className="text-blue-300! text-xs! mt-3 block">
+            {publications.length} publications · all publicly accessible
           </Text>
         </div>
+      </div>
 
-        {/* Search and Filters */}
-        <div className="mb-8 flex items-start justify-between gap-4">
-          <div className="max-w-sm flex items-center gap-2">
-            <Input
-              placeholder="Search by title, tag, or institution..."
-              prefix={<SearchOutlined />}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <Button className="text-gray-500 text-sm self-center">
-              Filter
-            </Button>
-          </div>
-
-          <Button
-            onClick={() => navigate("/chat")}
-            icon={<MessageOutlined />}
-            className="bg-blue-950! text-white! text-sm self-center"
+      {/* ── Topic pills ─────────────────────────────────────────────────────── */}
+      <div className="bg-white border-b border-gray-100 px-6 py-3 overflow-x-auto">
+        <div className="flex gap-2 min-w-max">
+          <button
+            onClick={() => setActiveTopic(null)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border transition-all cursor-pointer ${
+              activeTopic === null
+                ? "bg-gray-900 text-white border-gray-900"
+                : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+            }`}
           >
-            Explore with AI
-          </Button>
-        </div>
-
-        {/* Filter Sections */}
-        <div className="mb-8 p-4 bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="flex justify-between items-center mb-4">
-            {/* <Button type="link" onClick={clearFilters} icon={<CloseOutlined />}>
-              Clear All
-            </Button> */}
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {/* Topic Filter */}
-            <div>
-              <Text strong className="block mb-2">
-                TOPIC
-              </Text>
-              <Select
-                mode="multiple"
-                style={{ width: "100%" }}
-                placeholder="Select topics"
-                value={selectedTopics}
-                onChange={setSelectedTopics}
-                allowClear
-                size="middle"
-              >
-                {topicOptions.map((topic) => (
-                  <Option key={topic} value={topic}>
-                    {topic}
-                  </Option>
-                ))}
-              </Select>
-            </div>
-
-            {/* Access Type Filter */}
-            <div>
-              <Text strong className="block mb-2">
-                ACCESS TYPE
-              </Text>
-              <Select
-                mode="multiple"
-                style={{ width: "100%" }}
-                placeholder="Select access types"
-                value={selectedAccessTypes}
-                onChange={setSelectedAccessTypes}
-                allowClear
-                size="middle"
-              >
-                {accessTypeOptions.map((access) => (
-                  <Option key={access} value={access}>
-                    {access}
-                  </Option>
-                ))}
-              </Select>
-            </div>
-
-            {/* Province Filter */}
-            <div>
-              <Text strong className="block mb-2">
-                PROVINCE
-              </Text>
-              <Select
-                mode="multiple"
-                style={{ width: "100%" }}
-                placeholder="Select provinces"
-                value={selectedProvinces}
-                onChange={setSelectedProvinces}
-                allowClear
-                size="middle"
-              >
-                {provinceOptions.map((province) => (
-                  <Option key={province} value={province}>
-                    {province}
-                  </Option>
-                ))}
-              </Select>
-            </div>
-
-            {/* Year Filter */}
-            <div>
-              <Text strong className="block mb-2">
-                YEAR
-              </Text>
-              <Select
-                mode="multiple"
-                style={{ width: "100%" }}
-                placeholder="Select years"
-                value={selectedYears}
-                onChange={setSelectedYears}
-                allowClear
-                size="middle"
-              >
-                {yearOptions.map((year) => (
-                  <Option key={year} value={year}>
-                    {year}
-                  </Option>
-                ))}
-              </Select>
-            </div>
-          </div>
-
-          {/* Filter Summary */}
-          <div className="mt-4 pt-4 border-t border-gray-200">
-            <Text className="text-gray-600">
-              Showing {filteredDatasets.length} of {datasets.length} datasets
-            </Text>
-          </div>
-        </div>
-
-        {/* Dataset Grid */}
-        <div className="grid gap-6 lg:grid-cols-3">
-          {filteredDatasets.map((dataset) => (
-            <Card
-              key={dataset.id}
-              className="hover:shadow-lg transition-shadow duration-200"
-              bodyStyle={{ padding: "20px" }}
+            All
+            <span className={`text-xs ${activeTopic === null ? "text-gray-300" : "text-gray-400"}`}>
+              {publications.length}
+            </span>
+          </button>
+          {allTopics.map((t) => (
+            <button
+              key={t}
+              onClick={() => setActiveTopic(activeTopic === t ? null : t)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border transition-all cursor-pointer ${
+                activeTopic === t
+                  ? "text-white border-transparent"
+                  : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+              }`}
+              style={activeTopic === t ? { backgroundColor: TOPIC_DOT[t] ?? "#6b7280", borderColor: "transparent" } : {}}
             >
-              {/* Category Header */}
-              <div
-                className={`h-1 ${getCategoryColor(dataset.color)} mb-4 rounded`}
-              ></div>
-
-              {/* Tags */}
-              <div className="flex flex-wrap gap-2 mb-3">
-                <Tag color={dataset.color}>{dataset.category}</Tag>
-                <Tag color={getAccessColor(dataset.access)}>
-                  {dataset.access}
-                </Tag>
-              </div>
-
-              {/* Title */}
-              <Title level={4} className="mb-3 leading-tight">
-                {dataset.title}
-              </Title>
-
-              {/* Metadata */}
-              <div className="flex items-center gap-2 mb-3 text-xs text-gray-500">
-                <span>{dataset.institution}</span>
-                <span>•</span>
-                <span>{dataset.dateRange}</span>
-                <span>•</span>
-                <span>{dataset.scope}</span>
-              </div>
-
-              {/* Formats */}
-              <div className="flex gap-1 mb-3">
-                {dataset.formats.map((format) => (
-                  <Tag key={format} className="text-xs">
-                    {format}
-                  </Tag>
-                ))}
-              </div>
-
-              {/* Description */}
-              <Text className="text-sm text-gray-600 block mb-4">
-                {dataset.description}
-              </Text>
-
-              {/* Tags */}
-              <div className="flex flex-wrap gap-1 mb-4">
-                {dataset.tags.map((tag) => (
-                  <Tag key={tag} className="text-xs">
-                    {tag}
-                  </Tag>
-                ))}
-              </div>
-
-              {/* Actions */}
-              <div className="flex justify-between items-center">
-                <Button type="link" size="small" className="p-0">
-                  More details
-                </Button>
-                <Button type="primary" size="small">
-                  Access Dataset
-                </Button>
-              </div>
-            </Card>
+              <span
+                className="w-2 h-2 rounded-full shrink-0"
+                style={{ backgroundColor: TOPIC_DOT[t] ?? "#6b7280" }}
+              />
+              {t}
+              <span className={`text-xs ${activeTopic === t ? "text-white/70" : "text-gray-400"}`}>
+                {topicCounts[t]}
+              </span>
+            </button>
           ))}
         </div>
+      </div>
 
-        {/* No Results */}
-        {filteredDatasets.length === 0 && (
-          <div className="text-center py-12">
-            <Text className="text-gray-500">
-              No datasets found matching your search criteria.
-            </Text>
+      {/* ── Filter bar ──────────────────────────────────────────────────────── */}
+      <div className="bg-white border-b border-gray-100 px-6 py-2.5 flex items-center gap-2 flex-wrap">
+        <Select
+          mode="multiple"
+          placeholder="Year"
+          options={allYears.map((y) => ({ label: y, value: y }))}
+          value={years}
+          onChange={setYears}
+          size="small"
+          style={{ minWidth: 100 }}
+          maxTagCount="responsive"
+          allowClear
+        />
+        <Select
+          mode="multiple"
+          placeholder="Province"
+          options={allProvinces.map((p) => ({ label: p, value: p }))}
+          value={provinces}
+          onChange={setProvinces}
+          size="small"
+          style={{ minWidth: 110 }}
+          maxTagCount="responsive"
+          allowClear
+        />
+        <Select
+          mode="multiple"
+          placeholder="Institution"
+          options={allInstitutions.map((i) => ({ label: i, value: i }))}
+          value={institutions}
+          onChange={setInstitutions}
+          size="small"
+          style={{ minWidth: 130 }}
+          maxTagCount="responsive"
+          allowClear
+        />
+        <Segmented
+          options={[
+            { label: "All types", value: "All" },
+            { label: "PDF", value: "PDF", icon: <FilePdfOutlined /> },
+            { label: "Web", value: "Web Page", icon: <GlobalOutlined /> },
+          ]}
+          value={contentType}
+          onChange={(v) => setContentType(v as "All" | "PDF" | "Web Page")}
+          size="small"
+        />
+
+        {hasFilters && (
+          <button
+            onClick={clearAll}
+            className="flex items-center gap-1 text-xs text-red-500 hover:text-red-700 cursor-pointer ml-1"
+          >
+            <CloseOutlined style={{ fontSize: 10 }} /> Clear
+          </button>
+        )}
+
+        <div className="ml-auto flex items-center gap-3">
+          <Text className="text-gray-500 text-xs">
+            <span className="font-semibold text-gray-800 text-sm">{results.length}</span> of {publications.length}
+          </Text>
+          <div className="flex border border-gray-200 rounded overflow-hidden">
+            <button
+              onClick={() => setView("list")}
+              className={`p-1.5 cursor-pointer ${view === "list" ? "bg-gray-900 text-white" : "bg-white text-gray-500 hover:bg-gray-50"}`}
+            >
+              <UnorderedListOutlined style={{ fontSize: 13 }} />
+            </button>
+            <button
+              onClick={() => setView("grid")}
+              className={`p-1.5 cursor-pointer ${view === "grid" ? "bg-gray-900 text-white" : "bg-white text-gray-500 hover:bg-gray-50"}`}
+            >
+              <AppstoreOutlined style={{ fontSize: 13 }} />
+            </button>
+          </div>
+          <Button
+            size="small"
+            icon={<MessageOutlined />}
+            onClick={() => navigate("/chat")}
+            className="bg-purple-700! text-white! border-purple-700! text-xs"
+          >
+            Ask AI
+          </Button>
+        </div>
+      </div>
+
+      {/* ── Results ─────────────────────────────────────────────────────────── */}
+      <div className="max-w-6xl mx-auto px-6 py-6">
+        {results.length === 0 ? (
+          <Empty description="No publications match your filters." className="mt-24" />
+        ) : view === "list" ? (
+          <div className="flex flex-col gap-px bg-gray-200 rounded-xl overflow-hidden shadow-sm">
+            {results.map((pub) => (
+              <ListRow key={pub.id} pub={pub} />
+            ))}
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {results.map((pub) => (
+              <GridCard key={pub.id} pub={pub} />
+            ))}
           </div>
         )}
       </div>
     </div>
   );
 };
+
+// ─── List row ─────────────────────────────────────────────────────────────────
+function ListRow({ pub }: { pub: (typeof publications)[0] }) {
+  const dot = TOPIC_DOT[pub.topicCategory] ?? "#6b7280";
+  const tagColor = TOPIC_COLORS[pub.topicCategory] ?? "default";
+
+  return (
+    <div className="bg-white px-5 py-4 flex items-start gap-4 hover:bg-gray-50 transition-colors group">
+      {/* Topic dot */}
+      <div className="mt-1.5 shrink-0">
+        <Tooltip title={pub.topicCategory}>
+          <span className="block w-2.5 h-2.5 rounded-full" style={{ backgroundColor: dot }} />
+        </Tooltip>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold text-gray-900 leading-snug mb-1 group-hover:text-blue-900 transition-colors">
+          {pub.title}
+        </p>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-400">
+          <Tag color={tagColor} className="text-xs! m-0!">
+            {pub.topicCategory}
+          </Tag>
+          {pub.subTopicCategory && (
+            <span className="text-gray-400">{pub.subTopicCategory}</span>
+          )}
+          <span className="text-gray-300">·</span>
+          <span>{pub.sourceInstitution}</span>
+          {pub.year && <><span className="text-gray-300">·</span><span>{pub.year}</span></>}
+          <span className="text-gray-300">·</span>
+          <span>{pub.province}</span>
+        </div>
+      </div>
+
+      {/* Right actions */}
+      <div className="flex items-center gap-2 shrink-0">
+        <span
+          className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+            pub.contentType === "PDF"
+              ? "bg-red-50 text-red-600"
+              : "bg-cyan-50 text-cyan-700"
+          }`}
+        >
+          {pub.contentType === "PDF" ? <FilePdfOutlined className="mr-1" /> : <GlobalOutlined className="mr-1" />}
+          {pub.contentType}
+        </span>
+        <a href={pub.url} target="_blank" rel="noopener noreferrer">
+          <button className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-medium cursor-pointer px-2 py-1 rounded hover:bg-blue-50 transition-colors">
+            {pub.contentType === "PDF" ? (
+              <><DownloadOutlined /> PDF</>
+            ) : (
+              <>Open <ArrowRightOutlined /></>
+            )}
+          </button>
+        </a>
+      </div>
+    </div>
+  );
+}
+
+// ─── Grid card ────────────────────────────────────────────────────────────────
+function GridCard({ pub }: { pub: (typeof publications)[0] }) {
+  const dot = TOPIC_DOT[pub.topicCategory] ?? "#6b7280";
+  const tagColor = TOPIC_COLORS[pub.topicCategory] ?? "default";
+
+  return (
+    <div className="bg-white rounded-xl border border-gray-100 p-5 hover:shadow-md transition-shadow flex flex-col gap-3 group">
+      {/* Top row */}
+      <div className="flex items-start justify-between gap-2">
+        <Tag color={tagColor} className="text-xs! m-0!">
+          {pub.topicCategory}
+        </Tag>
+        <span
+          className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${
+            pub.contentType === "PDF" ? "bg-red-50 text-red-600" : "bg-cyan-50 text-cyan-700"
+          }`}
+        >
+          {pub.contentType}
+        </span>
+      </div>
+
+      {/* Title */}
+      <div className="flex gap-2.5">
+        <span className="mt-1 w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: dot }} />
+        <p className="text-sm font-semibold text-gray-900 leading-snug group-hover:text-blue-900 transition-colors line-clamp-3">
+          {pub.title}
+        </p>
+      </div>
+
+      {/* Meta */}
+      <div className="text-xs text-gray-400 space-y-0.5 mt-auto">
+        <div className="flex items-center gap-1.5">
+          <span className="font-medium text-gray-600">{pub.sourceInstitution}</span>
+          {pub.year && <><span>·</span><span>{pub.year}</span></>}
+        </div>
+        <div>{pub.province}</div>
+        {pub.subTopicCategory && <div className="text-gray-300">{pub.subTopicCategory}</div>}
+      </div>
+
+      {/* Action */}
+      <a href={pub.url} target="_blank" rel="noopener noreferrer" className="block">
+        <button className="w-full flex items-center justify-center gap-1.5 text-xs font-medium text-blue-700 border border-blue-100 bg-blue-50 hover:bg-blue-100 rounded-lg py-2 transition-colors cursor-pointer">
+          {pub.contentType === "PDF" ? (
+            <><DownloadOutlined /> Download PDF</>
+          ) : (
+            <>Visit Page <ArrowRightOutlined /></>
+          )}
+        </button>
+      </a>
+    </div>
+  );
+}
