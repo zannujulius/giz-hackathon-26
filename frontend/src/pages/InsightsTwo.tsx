@@ -14,16 +14,16 @@ import {
   Cell,
 } from "recharts";
 import {
-  RAW_DATA,
-  ALL_INDICATORS,
-  ALL_REGIONS,
-  ALL_YEARS,
-  INDICATOR_SHORT,
-  GUIDED_QUESTIONS,
-  REGION_COLORS,
-  INDICATOR_COLORS,
-  type ChartMode,
-} from "../data/indicators";
+  GENDER_RAW_DATA,
+  GENDER_ALL_INDICATORS,
+  GENDER_ALL_REGIONS,
+  GENDER_ALL_YEARS,
+  GENDER_INDICATOR_SHORT,
+  GENDER_GUIDED_QUESTIONS,
+  GENDER_REGION_COLORS,
+  GENDER_INDICATOR_COLORS,
+  type GenderChartMode,
+} from "../data/genderIndicators";
 import { useNavigate } from "react-router-dom";
 import RwandaProvinceMap from "../component/Map/RwandaProvinceMap";
 import {
@@ -35,22 +35,22 @@ import {
 const { Title, Text } = Typography;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
-interface ExplorerState {
+interface GenderExplorerState {
   indicators: string[];
   regions: string[];
   years: number[];
-  mode: ChartMode;
+  mode: GenderChartMode;
   activeQuestion: string | null;
 }
 
-const DEFAULT_STATE: ExplorerState = {
+const DEFAULT_GENDER_STATE: GenderExplorerState = {
   indicators: [
-    "Physical or sexual violence committed by husband/partner in last 12 months",
+    "Labor force participation rate, female (% of female population ages 15+)",
   ],
-  regions: [...ALL_REGIONS],
+  regions: ["Kigali", "East", "West", "North", "South"],
   years: [2019],
   mode: "regional",
-  activeQuestion: "q1",
+  activeQuestion: "g1",
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -59,33 +59,32 @@ function avg(nums: number[]): number {
   return Math.round((nums.reduce((a, b) => a + b, 0) / nums.length) * 10) / 10;
 }
 
-function getValues(
+function getGenderValues(
   indicator: string,
   region: string,
   years: number[],
 ): number[] {
-  return RAW_DATA.filter(
+  return GENDER_RAW_DATA.filter(
     (d) =>
       d.indicator === indicator &&
-      d.location === region &&
+      d.region === region &&
       years.includes(d.year),
   ).map((d) => d.value);
 }
 
-function getValue(
+function getGenderValue(
   indicator: string,
   region: string,
   year: number,
 ): number | null {
-  const pt = RAW_DATA.find(
-    (d) =>
-      d.indicator === indicator && d.location === region && d.year === year,
+  const pt = GENDER_RAW_DATA.find(
+    (d) => d.indicator === indicator && d.region === region && d.year === year,
   );
   return pt ? pt.value : null;
 }
 
 // ── Data builders ─────────────────────────────────────────────────────────────
-function buildTrendData(
+function buildGenderTrendData(
   indicators: string[],
   regions: string[],
   years: number[],
@@ -96,7 +95,7 @@ function buildTrendData(
     regions.forEach((region) => {
       const vals: number[] = [];
       indicators.forEach((ind) => {
-        const v = getValue(ind, region, yr);
+        const v = getGenderValue(ind, region, yr);
         if (v !== null) vals.push(v);
       });
       if (vals.length > 0) row[region] = avg(vals);
@@ -105,47 +104,47 @@ function buildTrendData(
   });
 }
 
-function buildRegionalData1(
+function buildGenderRegionalData1(
   indicator: string,
   regions: string[],
   years: number[],
 ): { region: string; value: number }[] {
   return regions.map((region) => {
-    const vals = getValues(indicator, region, years);
+    const vals = getGenderValues(indicator, region, years);
     return { region, value: avg(vals) };
   });
 }
 
-function buildRegionalData2(
+function buildGenderRegionalData2(
   ind1: string,
   ind2: string,
   regions: string[],
   years: number[],
 ): { region: string; ind1: number; ind2: number }[] {
   return regions.map((region) => {
-    const v1 = avg(getValues(ind1, region, years));
-    const v2 = avg(getValues(ind2, region, years));
+    const v1 = avg(getGenderValues(ind1, region, years));
+    const v2 = avg(getGenderValues(ind2, region, years));
     return { region, ind1: v1, ind2: v2 };
   });
 }
 
 // ── Auto-insight generator ────────────────────────────────────────────────────
-function generateInsight(
-  mode: ChartMode,
+function generateGenderInsight(
+  mode: GenderChartMode,
   indicators: string[],
   regions: string[],
   years: number[],
 ): string {
   if (!indicators.length || !regions.length || !years.length) return "";
 
-  const shortLabel = (ind: string) => INDICATOR_SHORT[ind] ?? ind;
+  const shortLabel = (ind: string) => GENDER_INDICATOR_SHORT[ind] ?? ind;
 
   if (mode === "regional" || mode === "compare") {
     const dataInd = indicators[0];
     const vals = regions
       .map((r) => ({
         region: r,
-        value: avg(getValues(dataInd, r, years)),
+        value: avg(getGenderValues(dataInd, r, years)),
       }))
       .filter((x) => x.value > 0);
 
@@ -160,14 +159,14 @@ function generateInsight(
         ? String(years[0])
         : `${Math.min(...years)}–${Math.max(...years)}`;
 
-    let insight = `${highest.region} records the highest rate of "${shortLabel(dataInd)}" at ${highest.value}%, which is ${diff} percentage points above ${lowest.region} (the lowest at ${lowest.value}%) as of ${yearLabel}.`;
+    let insight = `${highest.region} shows the highest "${shortLabel(dataInd)}" at ${highest.value}%, which is ${diff} percentage points above ${lowest.region} (${lowest.value}%) as of ${yearLabel}.`;
 
     if (mode === "compare" && indicators.length === 2) {
       const ind2 = indicators[1];
       const vals2 = regions
         .map((r) => ({
           region: r,
-          value: avg(getValues(ind2, r, years)),
+          value: avg(getGenderValues(ind2, r, years)),
         }))
         .filter((x) => x.value > 0);
       if (vals2.length) {
@@ -188,22 +187,26 @@ function generateInsight(
     const vals = regions
       .map((r) => ({
         region: r,
-        value: avg(indicators.map((ind) => getValue(ind, r, yr) ?? 0)),
+        value: avg(indicators.map((ind) => getGenderValue(ind, r, yr) ?? 0)),
       }))
       .filter((x) => x.value > 0);
     if (!vals.length) return "No data available for the selected filters.";
     const avgVal = avg(vals.map((v) => v.value));
-    return `In ${yr}, the average "${shortLabel(indicators[0])}" across selected provinces was ${avgVal}%.`;
+    return `In ${yr}, the average "${shortLabel(indicators[0])}" across selected regions was ${avgVal}%.`;
   }
 
   const firstYear = sortedYears[0];
   const lastYear = sortedYears[sortedYears.length - 1];
 
   const firstVals = regions
-    .map((r) => avg(indicators.map((ind) => getValue(ind, r, firstYear) ?? 0)))
+    .map((r) =>
+      avg(indicators.map((ind) => getGenderValue(ind, r, firstYear) ?? 0)),
+    )
     .filter((v) => v > 0);
   const lastVals = regions
-    .map((r) => avg(indicators.map((ind) => getValue(ind, r, lastYear) ?? 0)))
+    .map((r) =>
+      avg(indicators.map((ind) => getGenderValue(ind, r, lastYear) ?? 0)),
+    )
     .filter((v) => v > 0);
 
   if (!firstVals.length || !lastVals.length)
@@ -215,28 +218,7 @@ function generateInsight(
   const direction = change > 0 ? "increase" : "decrease";
   const absChange = Math.abs(change);
 
-  // find province with greatest absolute change
-  const changes = regions
-    .map((region) => {
-      const fv = avg(
-        indicators.map((ind) => getValue(ind, region, firstYear) ?? 0),
-      );
-      const lv = avg(
-        indicators.map((ind) => getValue(ind, region, lastYear) ?? 0),
-      );
-      return { region, change: lv - fv, from: fv, to: lv };
-    })
-    .filter((x) => x.from > 0 || x.to > 0);
-
-  const biggest = [...changes].sort(
-    (a, b) => Math.abs(b.change) - Math.abs(a.change),
-  )[0];
-  const biggestDir = biggest.change > 0 ? "deterioration" : "improvement";
-
-  return (
-    `Between ${firstYear} and ${lastYear}, the average "${shortLabel(indicators[0])}" changed from ${overallFirst}% to ${overallLast}% — a ${absChange}-point ${direction}. ` +
-    `${biggest.region} showed the greatest ${biggestDir}, moving from ${Math.round(biggest.from * 10) / 10}% to ${Math.round(biggest.to * 10) / 10}%.`
-  );
+  return `Between ${firstYear} and ${lastYear}, "${shortLabel(indicators[0])}" changed from ${overallFirst}% to ${overallLast}% — a ${absChange}-point ${direction}.`;
 }
 
 // ── Custom Tooltip ────────────────────────────────────────────────────────────
@@ -262,7 +244,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 // ── Chart components ──────────────────────────────────────────────────────────
-function TrendChart({
+function GenderTrendChart({
   indicators,
   regions,
   years,
@@ -272,7 +254,7 @@ function TrendChart({
   years: number[];
 }) {
   const data = useMemo(
-    () => buildTrendData(indicators, regions, years),
+    () => buildGenderTrendData(indicators, regions, years),
     [indicators, regions, years],
   );
 
@@ -291,8 +273,8 @@ function TrendChart({
             dataKey={region}
             name={region}
             stroke={
-              REGION_COLORS[region] ??
-              INDICATOR_COLORS[i % INDICATOR_COLORS.length]
+              GENDER_REGION_COLORS[region] ??
+              GENDER_INDICATOR_COLORS[i % GENDER_INDICATOR_COLORS.length]
             }
             strokeWidth={2.5}
             dot={{ r: 4 }}
@@ -305,7 +287,7 @@ function TrendChart({
   );
 }
 
-function RegionalChart1({
+function GenderRegionalChart1({
   indicator,
   regions,
   years,
@@ -315,7 +297,7 @@ function RegionalChart1({
   years: number[];
 }) {
   const data = useMemo(
-    () => buildRegionalData1(indicator, regions, years),
+    () => buildGenderRegionalData1(indicator, regions, years),
     [indicator, regions, years],
   );
 
@@ -329,13 +311,13 @@ function RegionalChart1({
         <Legend />
         <Bar
           dataKey="value"
-          name={INDICATOR_SHORT[indicator] ?? indicator}
+          name={GENDER_INDICATOR_SHORT[indicator] ?? indicator}
           radius={[4, 4, 0, 0]}
         >
           {data.map((entry) => (
             <Cell
               key={entry.region}
-              fill={REGION_COLORS[entry.region] ?? "#64748b"}
+              fill={GENDER_REGION_COLORS[entry.region] ?? "#64748b"}
             />
           ))}
         </Bar>
@@ -344,7 +326,7 @@ function RegionalChart1({
   );
 }
 
-function RegionalChart2({
+function GenderRegionalChart2({
   indicators,
   regions,
   years,
@@ -354,12 +336,13 @@ function RegionalChart2({
   years: number[];
 }) {
   const data = useMemo(
-    () => buildRegionalData2(indicators[0], indicators[1], regions, years),
+    () =>
+      buildGenderRegionalData2(indicators[0], indicators[1], regions, years),
     [indicators, regions, years],
   );
 
-  const label0 = INDICATOR_SHORT[indicators[0]] ?? indicators[0];
-  const label1 = INDICATOR_SHORT[indicators[1]] ?? indicators[1];
+  const label0 = GENDER_INDICATOR_SHORT[indicators[0]] ?? indicators[0];
+  const label1 = GENDER_INDICATOR_SHORT[indicators[1]] ?? indicators[1];
 
   return (
     <ResponsiveContainer width="100%" height={360}>
@@ -372,13 +355,13 @@ function RegionalChart2({
         <Bar
           dataKey="ind1"
           name={label0}
-          fill={INDICATOR_COLORS[0]}
+          fill={GENDER_INDICATOR_COLORS[0]}
           radius={[4, 4, 0, 0]}
         />
         <Bar
           dataKey="ind2"
           name={label1}
-          fill={INDICATOR_COLORS[1]}
+          fill={GENDER_INDICATOR_COLORS[1]}
           radius={[4, 4, 0, 0]}
         />
       </BarChart>
@@ -387,9 +370,9 @@ function RegionalChart2({
 }
 
 // ── Mode labels ───────────────────────────────────────────────────────────────
-const MODE_OPTIONS: { value: ChartMode; label: string }[] = [
+const MODE_OPTIONS: { value: GenderChartMode; label: string }[] = [
   { value: "trend", label: "Trend over time" },
-  { value: "regional", label: "By Province" },
+  { value: "regional", label: "By Region" },
   { value: "compare", label: "Compare" },
 ];
 
@@ -404,14 +387,16 @@ const TAG_COLOR_MAP: Record<string, string> = {
 };
 
 // ── Main page ─────────────────────────────────────────────────────────────────
-export const Insights: React.FC = () => {
-  const [state, setState] = useState<ExplorerState>(DEFAULT_STATE);
+export const InsightsTwo: React.FC = () => {
+  const navigate = useNavigate();
 
-  const updateState = (patch: Partial<ExplorerState>) =>
+  const [state, setState] = useState<GenderExplorerState>(DEFAULT_GENDER_STATE);
+
+  const updateState = (patch: Partial<GenderExplorerState>) =>
     setState((prev) => ({ ...prev, ...patch }));
 
   const applyQuestion = (qid: string) => {
-    const q = GUIDED_QUESTIONS.find((x) => x.id === qid);
+    const q = GENDER_GUIDED_QUESTIONS.find((x) => x.id === qid);
     if (!q) return;
     setState({
       indicators: q.indicators,
@@ -422,10 +407,11 @@ export const Insights: React.FC = () => {
     });
   };
 
-  const resetState = () => setState({ ...DEFAULT_STATE, activeQuestion: null });
+  const resetState = () =>
+    setState({ ...DEFAULT_GENDER_STATE, activeQuestion: null });
 
   const activeQ =
-    GUIDED_QUESTIONS.find((q) => q.id === state.activeQuestion) ?? null;
+    GENDER_GUIDED_QUESTIONS.find((q) => q.id === state.activeQuestion) ?? null;
 
   // Derive chart
   const chartNode = useMemo(() => {
@@ -440,14 +426,18 @@ export const Insights: React.FC = () => {
 
     if (mode === "trend") {
       return (
-        <TrendChart indicators={indicators} regions={regions} years={years} />
+        <GenderTrendChart
+          indicators={indicators}
+          regions={regions}
+          years={years}
+        />
       );
     }
 
     if (mode === "regional") {
       if (indicators.length >= 2) {
         return (
-          <RegionalChart2
+          <GenderRegionalChart2
             indicators={[indicators[0], indicators[1]]}
             regions={regions}
             years={years}
@@ -455,7 +445,7 @@ export const Insights: React.FC = () => {
         );
       }
       return (
-        <RegionalChart1
+        <GenderRegionalChart1
           indicator={indicators[0]}
           regions={regions}
           years={years}
@@ -466,7 +456,7 @@ export const Insights: React.FC = () => {
     // compare mode — always grouped by region, 2 indicators
     if (indicators.length >= 2) {
       return (
-        <RegionalChart2
+        <GenderRegionalChart2
           indicators={[indicators[0], indicators[1]]}
           regions={regions}
           years={years}
@@ -474,7 +464,7 @@ export const Insights: React.FC = () => {
       );
     }
     return (
-      <RegionalChart1
+      <GenderRegionalChart1
         indicator={indicators[0]}
         regions={regions}
         years={years}
@@ -484,7 +474,12 @@ export const Insights: React.FC = () => {
 
   const insight = useMemo(
     () =>
-      generateInsight(state.mode, state.indicators, state.regions, state.years),
+      generateGenderInsight(
+        state.mode,
+        state.indicators,
+        state.regions,
+        state.years,
+      ),
     [state.mode, state.indicators, state.regions, state.years],
   );
 
@@ -495,61 +490,79 @@ export const Insights: React.FC = () => {
       return [];
     }
 
+    // Filter out 'National' from regions for map visualization
+    const provincialRegions = regions.filter((r) => r !== "National");
+    if (provincialRegions.length === 0) {
+      return [];
+    }
+
     if (mode === "trend") {
-      const trendData = buildTrendData(indicators, regions, years);
+      const trendData = buildGenderTrendData(
+        indicators,
+        provincialRegions,
+        years,
+      );
       return transformTrendDataToMapData(trendData);
     }
 
     if (mode === "regional") {
       if (indicators.length >= 2) {
-        const comparisonData = buildRegionalData2(
+        const comparisonData = buildGenderRegionalData2(
           indicators[0],
           indicators[1],
-          regions,
+          provincialRegions,
           years,
         );
         return transformComparisonDataToMapData(comparisonData);
       }
-      const regionalData = buildRegionalData1(indicators[0], regions, years);
+      const regionalData = buildGenderRegionalData1(
+        indicators[0],
+        provincialRegions,
+        years,
+      );
       return transformRegionalDataToMapData(regionalData);
     }
 
     // compare mode
     if (indicators.length >= 2) {
-      const comparisonData = buildRegionalData2(
+      const comparisonData = buildGenderRegionalData2(
         indicators[0],
         indicators[1],
-        regions,
+        provincialRegions,
         years,
       );
       return transformComparisonDataToMapData(comparisonData);
     }
-    const regionalData = buildRegionalData1(indicators[0], regions, years);
+    const regionalData = buildGenderRegionalData1(
+      indicators[0],
+      provincialRegions,
+      years,
+    );
     return transformRegionalDataToMapData(regionalData);
   }, [state]);
 
-  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-gray-50">
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      {/*  bg-gradient-to-r from-black via-blue-950 to-purple-800 */}
-      <div className="px-6 pt-10 bg-[#0586b5] pb-8">
+      {/* bg-gradient-to-r from-green-800 via-teal-700 to-blue-800 */}
+      <div className="bg-primary px-6 pt-10 pb-8">
         <div className="max-w-6xl mx-auto">
           <Text className="text-slate-100! text-xs! uppercase tracking-widest block mb-2">
-            DHS Rwanda · 2005 – 2019 · Subnational
+            World Bank Gender Data · 2015 – 2019 · Rwanda
           </Text>
           <Title level={2} className="text-white! mb-2!">
-            Gender Data Explorer
+            Gender Indicators Explorer
           </Title>
-          <Text className="text-blue-200! text-sm!">
-            Interactively explore gender indicators across Rwanda's five
-            provinces. Choose a guided question or build your own view.
+          <Text className="text-slate-200! text-sm!">
+            Explore World Bank gender indicators across Rwanda's regions. Track
+            progress in education, labor force, financial inclusion, and
+            political participation.
           </Text>
         </div>
       </div>
       {/* ── Guided Questions row ─────────────────────────────────────────── */}
       <div className="border-b border-gray-200 bg-white">
-        <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className="max-w-6xl mx-auto px-6 py-4">
           <div className="flex mb-4 items-center justify-between">
             <p className="text-xs font-semibold text-gray-800 uppercase tracking-wider mb-3">
               Sample Questions
@@ -561,8 +574,9 @@ export const Insights: React.FC = () => {
               Ask Questions !!
             </Button>
           </div>
+
           <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-            {GUIDED_QUESTIONS.map((q) => {
+            {GENDER_GUIDED_QUESTIONS.map((q) => {
               const isActive = state.activeQuestion === q.id;
               return (
                 <button
@@ -597,7 +611,7 @@ export const Insights: React.FC = () => {
         </div>
       </div>
       {/* ── Main two-panel layout ─────────────────────────────────────────── */}
-      <div className="max-w-7xl mx-auto px-6 py-6 flex gap-6 items-start">
+      <div className="max-w-6xl mx-auto px-6 py-6 flex gap-6 items-start">
         {/* Left panel — controls */}
         <aside
           className="flex-shrink-0 w-72 sticky top-0 h-screen overflow-y-auto pb-8"
@@ -627,9 +641,9 @@ export const Insights: React.FC = () => {
                 onChange={(vals) =>
                   updateState({ indicators: vals, activeQuestion: null })
                 }
-                options={ALL_INDICATORS.map((ind) => ({
+                options={GENDER_ALL_INDICATORS.map((ind) => ({
                   value: ind,
-                  label: INDICATOR_SHORT[ind] ?? ind,
+                  label: GENDER_INDICATOR_SHORT[ind] ?? ind,
                 }))}
                 size="middle"
               />
@@ -638,10 +652,10 @@ export const Insights: React.FC = () => {
             {/* Region checkboxes */}
             <div>
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                Provinces
+                Regions
               </p>
               <div className="flex flex-col gap-1.5">
-                {ALL_REGIONS.map((region) => (
+                {GENDER_ALL_REGIONS.map((region) => (
                   <Checkbox
                     key={region}
                     checked={state.regions.includes(region)}
@@ -655,7 +669,9 @@ export const Insights: React.FC = () => {
                     <span className="flex items-center gap-2 text-sm">
                       <span
                         className="inline-block w-2.5 h-2.5 rounded-full"
-                        style={{ backgroundColor: REGION_COLORS[region] }}
+                        style={{
+                          backgroundColor: GENDER_REGION_COLORS[region],
+                        }}
                       />
                       {region}
                     </span>
@@ -670,7 +686,7 @@ export const Insights: React.FC = () => {
                 Survey Years
               </p>
               <div className="flex flex-wrap gap-x-4 gap-y-1.5">
-                {ALL_YEARS.map((yr) => (
+                {GENDER_ALL_YEARS.map((yr) => (
                   <Checkbox
                     key={yr}
                     checked={state.years.includes(yr)}
@@ -749,13 +765,13 @@ export const Insights: React.FC = () => {
                 {state.mode === "trend"
                   ? "Trend over time"
                   : state.mode === "regional"
-                    ? "By Province"
+                    ? "By Region"
                     : "Comparison"}
               </p>
               <p className="text-sm text-gray-600 leading-snug">
                 {state.indicators.length > 0
                   ? state.indicators
-                      .map((i) => INDICATOR_SHORT[i] ?? i)
+                      .map((i) => GENDER_INDICATOR_SHORT[i] ?? i)
                       .join(" vs. ")
                   : "No indicator selected"}
                 {state.years.length === 1
@@ -767,8 +783,8 @@ export const Insights: React.FC = () => {
             </div>
             {chartNode}
             <p className="text-xs text-gray-400 mt-3">
-              Source: DHS Program · Rwanda Demographic and Health Surveys ·
-              2005–2019 · All values are percentages (%).
+              Source: World Bank Gender Data Portal · 2015–2019 · All values are
+              percentages (%) unless otherwise noted.
             </p>
           </div>
 
@@ -777,15 +793,15 @@ export const Insights: React.FC = () => {
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
               <div className="mb-4">
                 <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold mb-1">
-                  Province Map Visualization
+                  Regional Map Visualization
                 </p>
                 <p className="text-sm text-gray-600 leading-snug">
                   Interactive map showing{" "}
                   {state.indicators.length > 0
-                    ? (INDICATOR_SHORT[state.indicators[0]] ??
+                    ? (GENDER_INDICATOR_SHORT[state.indicators[0]] ??
                       state.indicators[0])
                     : "indicator values"}{" "}
-                  across Rwanda provinces
+                  across Rwanda's regions
                   {state.years.length === 1
                     ? ` · ${state.years[0]}`
                     : state.years.length > 1
@@ -799,23 +815,23 @@ export const Insights: React.FC = () => {
                 apiKey="AIzaSyDuIM9LDOFi0W8SmozMBi_B31OiCGiG78c"
                 title={
                   state.indicators.length > 0
-                    ? (INDICATOR_SHORT[state.indicators[0]] ??
+                    ? (GENDER_INDICATOR_SHORT[state.indicators[0]] ??
                       state.indicators[0])
                     : "Data Visualization"
                 }
               />
 
               <p className="text-xs text-gray-400 mt-3">
-                Source: DHS Program · Rwanda Demographic and Health Surveys ·
-                2005–2019 · Click on province markers to see detailed values.
+                Source: World Bank Gender Data Portal · 2015–2019 · Click on
+                region markers to see detailed values.
               </p>
             </div>
           )}
 
           {/* Auto-insight */}
           {insight && (
-            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 text-sm text-blue-900">
-              <p className="font-semibold text-blue-700 mb-1 text-xs uppercase tracking-wider">
+            <div className="bg-green-50 border border-green-100 rounded-xl p-4 text-sm text-green-900">
+              <p className="font-semibold text-green-700 mb-1 text-xs uppercase tracking-wider">
                 Auto-generated Insight
               </p>
               {insight}

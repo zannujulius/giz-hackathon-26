@@ -1,4 +1,4 @@
-import React, { useState, type ReactNode } from "react";
+import React from "react";
 import {
   Layout,
   Menu,
@@ -6,9 +6,9 @@ import {
   Dropdown,
   Space,
   type MenuProps,
-  Breadcrumb,
   theme,
   Typography,
+  Badge,
 } from "antd";
 import {
   DatabaseOutlined,
@@ -19,16 +19,16 @@ import {
   SettingOutlined,
   UsergroupAddOutlined,
   UserOutlined,
+  GlobalOutlined,
+  BellOutlined,
 } from "@ant-design/icons";
-import { useSelector } from "react-redux";
 import { Link, Outlet, useNavigate } from "react-router-dom";
-import Title from "antd/es/typography/Title";
 
 type AppLayoutProps = {
   // children?: ReactNode;
 };
 
-const { Header, Content, Footer, Sider } = Layout;
+const { Header, Content, Sider } = Layout;
 
 const siderStyle: React.CSSProperties = {
   overflow: "auto",
@@ -55,21 +55,35 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     },
     {
       key: "2",
-      icon: <DatabaseOutlined />,
+      icon: <GlobalOutlined />,
       label: (
         <div className="rounded">
-          <Link to="/catalogue">Catalogue</Link>
+          <Link to="/catalogue">Data Explorer</Link>
         </div>
       ),
     },
     {
       key: "3",
       icon: <BarChartOutlined />,
-      label: (
-        <div className="rounded">
-          <Link to="/insights">Insights</Link>
-        </div>
-      ),
+      label: "Insights",
+      children: [
+        {
+          key: "3-1",
+          label: (
+            <div className="rounded">
+              <Link to="/insights">DHS Gender Data</Link>
+            </div>
+          ),
+        },
+        {
+          key: "3-2",
+          label: (
+            <div className="rounded">
+              <Link to="/insights_two">World Bank Indicators</Link>
+            </div>
+          ),
+        },
+      ],
     },
   ];
   const userMenuItems = [
@@ -135,7 +149,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     },
   ];
 
-  const { Text, Title } = Typography;
+  const { Text } = Typography;
   const navigate = useNavigate();
   const profileItems: MenuProps["items"] = [
     {
@@ -172,9 +186,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
         className="flex flex-col p-2  bg-blue-200/10! border-gray-200 border-r-[.5px] relative"
       >
         <div className="demo-logo-vertical" />
-
-        <div className="border-2 bg-gradient-to-r rounded-md from-black via-blue-950 to-purple-800 border-white flex flex-col items-center justify-center rounded h-12 ">
-          <Text className="text-center text-white! text-lg! uppercase font-bold ">
+        {/* bg-gradient-to-r rounded-md from-black via-blue-950 to-purple-800 text-white!  */}
+        <div className="border-2 border-white flex flex-col items-center justify-center rounded h-12 ">
+          <Text className="text-center text-lg! uppercase font-bold ">
             uburinganire
           </Text>
         </div>
@@ -191,7 +205,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
             Chat history
           </div>
         </div>
-
         {/* Chat Menu */}
         <Menu
           // theme=""
@@ -240,15 +253,26 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
             zIndex: 1,
           }}
         >
-          <Text className="font-bold text-lg!">Welcome to the GBP!!</Text>
-          <Link to="/chat" className="underline! cursor-pointer">
+          <Text className="font-bold text-md!">Welcome to the John</Text>
+          {/* <Link to="/chat" className="underline! cursor-pointer">
             Pregnancy and childbirth
-          </Link>
-          <div className="">
+          </Link> */}
+          <div className="flex items-center">
+            <div className="pt-2 mr-4">
+              <Badge count={0} showZero>
+                <BellOutlined
+                  className="text-gray-700"
+                  style={{
+                    fontSize: 20,
+                  }}
+                  size={20}
+                />
+              </Badge>
+            </div>
             <Dropdown menu={{ items: profileItems }} trigger={["hover"]}>
-              <a onClick={(e) => e.preventDefault()}>
+              <div className="">
                 <Space>
-                  <Avatar size={32} icon={"🧑‍🦱"} />
+                  <Avatar className="bg-white!" size={32} icon={"🧑‍🦱"} />
                   <p className=" m-0! mt-2 text-black p-0!">Demo User</p>
                   <DownOutlined
                     style={{
@@ -257,7 +281,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
                     color="white"
                   />
                 </Space>
-              </a>
+              </div>
             </Dropdown>
           </div>
         </Header>

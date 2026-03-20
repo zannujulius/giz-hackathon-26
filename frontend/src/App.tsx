@@ -5,6 +5,7 @@ import AppLayout from "./component/Applayout";
 import { Catalogue } from "./pages/Catalogue";
 import { Chat } from "./pages/Chat";
 import { Insights } from "./pages/Insights";
+import { InsightsTwo } from "./pages/InsightsTwo";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
           <Route index element={<Home />} />
           <Route path="/catalogue" element={<Catalogue />} />
           <Route path="/insights" element={<Insights />} />
+          <Route path="/insights_two" element={<InsightsTwo />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="*" element={<div>Page Not Found</div>} />
         </Route>
