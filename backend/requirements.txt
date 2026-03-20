@@ -1,0 +1,28 @@
+# API framework
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+python-dotenv==1.0.1
+pydantic-settings==2.6.1
+
+# Groq (LLM - ultra-fast inference)
+groq==0.13.0
+
+# Supabase (vector + keyword DB)
+supabase>=2.10.0
+
+# Tavily (web search)
+tavily-python==0.5.0
+
+# Embeddings (local, fast, free)
+sentence-transformers==3.3.1
+
+# PDF parsing
+pymupdf==1.24.14          # text + structure extraction
+pdfplumber==0.11.4        # table extraction for statistical reports
+
+
+# Utilities
+numpy>=2.0
+tiktoken==0.8.0           # token counting
+tenacity==9.0.0           # retry logic
+structlog==24.4.0         # structured logging
