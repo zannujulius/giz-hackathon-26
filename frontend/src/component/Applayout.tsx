@@ -173,7 +173,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       >
         <div className="demo-logo-vertical" />
 
-        <div className="border-2 bg-gradient-to-r rounded-md from-black via-blue-950 to-purple-800 border-white flex flex-col items-center justify-center rounded h-12 ">
+        <div className="border-2 bg-gradient-to-r rounded-md from-black via-black to-black border-white flex flex-col items-center justify-center rounded h-12 ">
           <Text className="text-center text-white! text-lg! uppercase font-bold ">
             uburinganire
           </Text>
@@ -241,6 +241,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
           }}
         >
           <Text className="font-bold text-lg!">Welcome to the GBP!!</Text>
+          {/* hte  */}
           <Link to="/chat" className="underline! cursor-pointer">
             Pregnancy and childbirth
           </Link>

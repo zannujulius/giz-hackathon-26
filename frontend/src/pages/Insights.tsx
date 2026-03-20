@@ -24,9 +24,15 @@ import {
   INDICATOR_COLORS,
   type ChartMode,
 } from "../data/indicators";
+import { useNavigate } from "react-router-dom";
+import { RwandaProvinceMap } from "../component/Map";
+import { 
+  transformRegionalDataToMapData, 
+  transformComparisonDataToMapData, 
+  transformTrendDataToMapData 
+} from "../component/Map/mapDataUtils";
 
 const { Title, Text } = Typography;
-
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface ExplorerState {
   indicators: string[];
@@ -37,7 +43,9 @@ interface ExplorerState {
 }
 
 const DEFAULT_STATE: ExplorerState = {
-  indicators: ["Physical or sexual violence committed by husband/partner in last 12 months"],
+  indicators: [
+    "Physical or sexual violence committed by husband/partner in last 12 months",
+  ],
   regions: [...ALL_REGIONS],
   years: [2019],
   mode: "regional",
@@ -50,15 +58,27 @@ function avg(nums: number[]): number {
   return Math.round((nums.reduce((a, b) => a + b, 0) / nums.length) * 10) / 10;
 }
 
-function getValues(indicator: string, region: string, years: number[]): number[] {
+function getValues(
+  indicator: string,
+  region: string,
+  years: number[],
+): number[] {
   return RAW_DATA.filter(
-    (d) => d.indicator === indicator && d.location === region && years.includes(d.year)
+    (d) =>
+      d.indicator === indicator &&
+      d.location === region &&
+      years.includes(d.year),
   ).map((d) => d.value);
 }
 
-function getValue(indicator: string, region: string, year: number): number | null {
+function getValue(
+  indicator: string,
+  region: string,
+  year: number,
+): number | null {
   const pt = RAW_DATA.find(
-    (d) => d.indicator === indicator && d.location === region && d.year === year
+    (d) =>
+      d.indicator === indicator && d.location === region && d.year === year,
   );
   return pt ? pt.value : null;
 }
@@ -67,7 +87,7 @@ function getValue(indicator: string, region: string, year: number): number | nul
 function buildTrendData(
   indicators: string[],
   regions: string[],
-  years: number[]
+  years: number[],
 ): Record<string, number | string>[] {
   const sortedYears = [...years].sort((a, b) => a - b);
   return sortedYears.map((yr) => {
@@ -87,7 +107,7 @@ function buildTrendData(
 function buildRegionalData1(
   indicator: string,
   regions: string[],
-  years: number[]
+  years: number[],
 ): { region: string; value: number }[] {
   return regions.map((region) => {
     const vals = getValues(indicator, region, years);
@@ -99,7 +119,7 @@ function buildRegionalData2(
   ind1: string,
   ind2: string,
   regions: string[],
-  years: number[]
+  years: number[],
 ): { region: string; ind1: number; ind2: number }[] {
   return regions.map((region) => {
     const v1 = avg(getValues(ind1, region, years));
@@ -113,7 +133,7 @@ function generateInsight(
   mode: ChartMode,
   indicators: string[],
   regions: string[],
-  years: number[]
+  years: number[],
 ): string {
   if (!indicators.length || !regions.length || !years.length) return "";
 
@@ -121,10 +141,12 @@ function generateInsight(
 
   if (mode === "regional" || mode === "compare") {
     const dataInd = indicators[0];
-    const vals = regions.map((r) => ({
-      region: r,
-      value: avg(getValues(dataInd, r, years)),
-    })).filter((x) => x.value > 0);
+    const vals = regions
+      .map((r) => ({
+        region: r,
+        value: avg(getValues(dataInd, r, years)),
+      }))
+      .filter((x) => x.value > 0);
 
     if (!vals.length) return "No data available for the selected filters.";
 
@@ -132,16 +154,21 @@ function generateInsight(
     const highest = sorted[0];
     const lowest = sorted[sorted.length - 1];
     const diff = Math.round((highest.value - lowest.value) * 10) / 10;
-    const yearLabel = years.length === 1 ? String(years[0]) : `${Math.min(...years)}–${Math.max(...years)}`;
+    const yearLabel =
+      years.length === 1
+        ? String(years[0])
+        : `${Math.min(...years)}–${Math.max(...years)}`;
 
     let insight = `${highest.region} records the highest rate of "${shortLabel(dataInd)}" at ${highest.value}%, which is ${diff} percentage points above ${lowest.region} (the lowest at ${lowest.value}%) as of ${yearLabel}.`;
 
     if (mode === "compare" && indicators.length === 2) {
       const ind2 = indicators[1];
-      const vals2 = regions.map((r) => ({
-        region: r,
-        value: avg(getValues(ind2, r, years)),
-      })).filter((x) => x.value > 0);
+      const vals2 = regions
+        .map((r) => ({
+          region: r,
+          value: avg(getValues(ind2, r, years)),
+        }))
+        .filter((x) => x.value > 0);
       if (vals2.length) {
         const avg1 = avg(vals.map((v) => v.value));
         const avg2 = avg(vals2.map((v) => v.value));
@@ -157,10 +184,12 @@ function generateInsight(
   const sortedYears = [...years].sort((a, b) => a - b);
   if (sortedYears.length < 2) {
     const yr = sortedYears[0];
-    const vals = regions.map((r) => ({
-      region: r,
-      value: avg(indicators.map((ind) => getValue(ind, r, yr) ?? 0)),
-    })).filter((x) => x.value > 0);
+    const vals = regions
+      .map((r) => ({
+        region: r,
+        value: avg(indicators.map((ind) => getValue(ind, r, yr) ?? 0)),
+      }))
+      .filter((x) => x.value > 0);
     if (!vals.length) return "No data available for the selected filters.";
     const avgVal = avg(vals.map((v) => v.value));
     return `In ${yr}, the average "${shortLabel(indicators[0])}" across selected provinces was ${avgVal}%.`;
@@ -169,14 +198,15 @@ function generateInsight(
   const firstYear = sortedYears[0];
   const lastYear = sortedYears[sortedYears.length - 1];
 
-  const firstVals = regions.map((r) =>
-    avg(indicators.map((ind) => getValue(ind, r, firstYear) ?? 0))
-  ).filter((v) => v > 0);
-  const lastVals = regions.map((r) =>
-    avg(indicators.map((ind) => getValue(ind, r, lastYear) ?? 0))
-  ).filter((v) => v > 0);
+  const firstVals = regions
+    .map((r) => avg(indicators.map((ind) => getValue(ind, r, firstYear) ?? 0)))
+    .filter((v) => v > 0);
+  const lastVals = regions
+    .map((r) => avg(indicators.map((ind) => getValue(ind, r, lastYear) ?? 0)))
+    .filter((v) => v > 0);
 
-  if (!firstVals.length || !lastVals.length) return "Insufficient data for the selected filters.";
+  if (!firstVals.length || !lastVals.length)
+    return "Insufficient data for the selected filters.";
 
   const overallFirst = avg(firstVals);
   const overallLast = avg(lastVals);
@@ -185,13 +215,21 @@ function generateInsight(
   const absChange = Math.abs(change);
 
   // find province with greatest absolute change
-  const changes = regions.map((region) => {
-    const fv = avg(indicators.map((ind) => getValue(ind, region, firstYear) ?? 0));
-    const lv = avg(indicators.map((ind) => getValue(ind, region, lastYear) ?? 0));
-    return { region, change: lv - fv, from: fv, to: lv };
-  }).filter((x) => x.from > 0 || x.to > 0);
+  const changes = regions
+    .map((region) => {
+      const fv = avg(
+        indicators.map((ind) => getValue(ind, region, firstYear) ?? 0),
+      );
+      const lv = avg(
+        indicators.map((ind) => getValue(ind, region, lastYear) ?? 0),
+      );
+      return { region, change: lv - fv, from: fv, to: lv };
+    })
+    .filter((x) => x.from > 0 || x.to > 0);
 
-  const biggest = [...changes].sort((a, b) => Math.abs(b.change) - Math.abs(a.change))[0];
+  const biggest = [...changes].sort(
+    (a, b) => Math.abs(b.change) - Math.abs(a.change),
+  )[0];
   const biggestDir = biggest.change > 0 ? "deterioration" : "improvement";
 
   return (
@@ -207,9 +245,15 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-sm min-w-[160px]">
       <p className="font-semibold text-gray-700 mb-1">{label}</p>
       {payload.map((p: any) => (
-        <p key={p.name} style={{ color: p.color }} className="flex justify-between gap-4">
+        <p
+          key={p.name}
+          style={{ color: p.color }}
+          className="flex justify-between gap-4"
+        >
           <span>{p.name}</span>
-          <span className="font-bold">{p.value !== undefined && p.value !== null ? `${p.value}%` : "—"}</span>
+          <span className="font-bold">
+            {p.value !== undefined && p.value !== null ? `${p.value}%` : "—"}
+          </span>
         </p>
       ))}
     </div>
@@ -228,7 +272,7 @@ function TrendChart({
 }) {
   const data = useMemo(
     () => buildTrendData(indicators, regions, years),
-    [indicators, regions, years]
+    [indicators, regions, years],
   );
 
   return (
@@ -245,7 +289,10 @@ function TrendChart({
             type="monotone"
             dataKey={region}
             name={region}
-            stroke={REGION_COLORS[region] ?? INDICATOR_COLORS[i % INDICATOR_COLORS.length]}
+            stroke={
+              REGION_COLORS[region] ??
+              INDICATOR_COLORS[i % INDICATOR_COLORS.length]
+            }
             strokeWidth={2.5}
             dot={{ r: 4 }}
             connectNulls
@@ -268,7 +315,7 @@ function RegionalChart1({
 }) {
   const data = useMemo(
     () => buildRegionalData1(indicator, regions, years),
-    [indicator, regions, years]
+    [indicator, regions, years],
   );
 
   return (
@@ -279,9 +326,16 @@ function RegionalChart1({
         <YAxis unit="%" tick={{ fontSize: 12 }} domain={[0, "auto"]} />
         <Tooltip content={<CustomTooltip />} />
         <Legend />
-        <Bar dataKey="value" name={INDICATOR_SHORT[indicator] ?? indicator} radius={[4, 4, 0, 0]}>
+        <Bar
+          dataKey="value"
+          name={INDICATOR_SHORT[indicator] ?? indicator}
+          radius={[4, 4, 0, 0]}
+        >
           {data.map((entry) => (
-            <Cell key={entry.region} fill={REGION_COLORS[entry.region] ?? "#64748b"} />
+            <Cell
+              key={entry.region}
+              fill={REGION_COLORS[entry.region] ?? "#64748b"}
+            />
           ))}
         </Bar>
       </BarChart>
@@ -300,7 +354,7 @@ function RegionalChart2({
 }) {
   const data = useMemo(
     () => buildRegionalData2(indicators[0], indicators[1], regions, years),
-    [indicators, regions, years]
+    [indicators, regions, years],
   );
 
   const label0 = INDICATOR_SHORT[indicators[0]] ?? indicators[0];
@@ -314,8 +368,18 @@ function RegionalChart2({
         <YAxis unit="%" tick={{ fontSize: 12 }} domain={[0, "auto"]} />
         <Tooltip content={<CustomTooltip />} />
         <Legend />
-        <Bar dataKey="ind1" name={label0} fill={INDICATOR_COLORS[0]} radius={[4, 4, 0, 0]} />
-        <Bar dataKey="ind2" name={label1} fill={INDICATOR_COLORS[1]} radius={[4, 4, 0, 0]} />
+        <Bar
+          dataKey="ind1"
+          name={label0}
+          fill={INDICATOR_COLORS[0]}
+          radius={[4, 4, 0, 0]}
+        />
+        <Bar
+          dataKey="ind2"
+          name={label1}
+          fill={INDICATOR_COLORS[1]}
+          radius={[4, 4, 0, 0]}
+        />
       </BarChart>
     </ResponsiveContainer>
   );
@@ -340,6 +404,8 @@ const TAG_COLOR_MAP: Record<string, string> = {
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 export const Insights: React.FC = () => {
+  const navigate = useNavigate();
+
   const [state, setState] = useState<ExplorerState>(DEFAULT_STATE);
 
   const updateState = (patch: Partial<ExplorerState>) =>
@@ -359,7 +425,8 @@ export const Insights: React.FC = () => {
 
   const resetState = () => setState({ ...DEFAULT_STATE, activeQuestion: null });
 
-  const activeQ = GUIDED_QUESTIONS.find((q) => q.id === state.activeQuestion) ?? null;
+  const activeQ =
+    GUIDED_QUESTIONS.find((q) => q.id === state.activeQuestion) ?? null;
 
   // Derive chart
   const chartNode = useMemo(() => {
@@ -373,7 +440,9 @@ export const Insights: React.FC = () => {
     }
 
     if (mode === "trend") {
-      return <TrendChart indicators={indicators} regions={regions} years={years} />;
+      return (
+        <TrendChart indicators={indicators} regions={regions} years={years} />
+      );
     }
 
     if (mode === "regional") {
@@ -387,7 +456,11 @@ export const Insights: React.FC = () => {
         );
       }
       return (
-        <RegionalChart1 indicator={indicators[0]} regions={regions} years={years} />
+        <RegionalChart1
+          indicator={indicators[0]}
+          regions={regions}
+          years={years}
+        />
       );
     }
 
@@ -402,15 +475,49 @@ export const Insights: React.FC = () => {
       );
     }
     return (
-      <RegionalChart1 indicator={indicators[0]} regions={regions} years={years} />
+      <RegionalChart1
+        indicator={indicators[0]}
+        regions={regions}
+        years={years}
+      />
     );
   }, [state]);
 
   const insight = useMemo(
     () =>
       generateInsight(state.mode, state.indicators, state.regions, state.years),
-    [state.mode, state.indicators, state.regions, state.years]
+    [state.mode, state.indicators, state.regions, state.years],
   );
+
+  // Generate map data based on current state
+  const mapData = useMemo(() => {
+    const { indicators, regions, years, mode } = state;
+    if (!indicators.length || !regions.length || !years.length) {
+      return [];
+    }
+
+    if (mode === "trend") {
+      const trendData = buildTrendData(indicators, regions, years);
+      return transformTrendDataToMapData(trendData);
+    }
+
+    if (mode === "regional") {
+      if (indicators.length >= 2) {
+        const comparisonData = buildRegionalData2(indicators[0], indicators[1], regions, years);
+        return transformComparisonDataToMapData(comparisonData);
+      }
+      const regionalData = buildRegionalData1(indicators[0], regions, years);
+      return transformRegionalDataToMapData(regionalData);
+    }
+
+    // compare mode
+    if (indicators.length >= 2) {
+      const comparisonData = buildRegionalData2(indicators[0], indicators[1], regions, years);
+      return transformComparisonDataToMapData(comparisonData);
+    }
+    const regionalData = buildRegionalData1(indicators[0], regions, years);
+    return transformRegionalDataToMapData(regionalData);
+  }, [state]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -424,8 +531,8 @@ export const Insights: React.FC = () => {
             Gender Data Explorer
           </Title>
           <Text className="text-blue-200! text-sm!">
-            Interactively explore gender indicators across Rwanda's five provinces. Choose a guided
-            question or build your own view.
+            Interactively explore gender indicators across Rwanda's five
+            provinces. Choose a guided question or build your own view.
           </Text>
         </div>
       </div>
@@ -433,9 +540,18 @@ export const Insights: React.FC = () => {
       {/* ── Guided Questions row ─────────────────────────────────────────── */}
       <div className="border-b border-gray-200 bg-white">
         <div className="max-w-6xl mx-auto px-6 py-4">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-            Guided Questions
-          </p>
+          <div className="flex mb-4 items-center justify-between">
+            <p className="text-xs font-semibold text-gray-800 uppercase tracking-wider mb-3">
+              Sample Questions
+            </p>
+            <Button
+              className="bg-black! text-white!"
+              onClick={() => navigate("/chat")}
+            >
+              Ask Questions !!
+            </Button>
+          </div>
+
           <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
             {GUIDED_QUESTIONS.map((q) => {
               const isActive = state.activeQuestion === q.id;
@@ -459,7 +575,8 @@ export const Insights: React.FC = () => {
                     className={`self-start text-xs px-2 py-0.5 rounded-full font-medium ${
                       isActive
                         ? "bg-white/20 text-white"
-                        : (TAG_COLOR_MAP[q.tagColor] ?? "bg-gray-100 text-gray-600")
+                        : (TAG_COLOR_MAP[q.tagColor] ??
+                          "bg-gray-100 text-gray-600")
                     }`}
                   >
                     {q.tag}
@@ -593,14 +710,20 @@ export const Insights: React.FC = () => {
           {/* Active question context */}
           {activeQ && (
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4 flex gap-4 items-start">
-              <span className="text-2xl leading-none mt-0.5">{activeQ.icon}</span>
+              <span className="text-2xl leading-none mt-0.5">
+                {activeQ.icon}
+              </span>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="font-semibold text-gray-900 text-base">
                     {activeQ.question}
                   </span>
                   <Tag
-                    color={activeQ.tagColor === "volcano" ? "volcano" : activeQ.tagColor}
+                    color={
+                      activeQ.tagColor === "volcano"
+                        ? "volcano"
+                        : activeQ.tagColor
+                    }
                     className="text-xs"
                   >
                     {activeQ.tag}
@@ -618,26 +741,66 @@ export const Insights: React.FC = () => {
                 {state.mode === "trend"
                   ? "Trend over time"
                   : state.mode === "regional"
-                  ? "By Province"
-                  : "Comparison"}
+                    ? "By Province"
+                    : "Comparison"}
               </p>
               <p className="text-sm text-gray-600 leading-snug">
                 {state.indicators.length > 0
-                  ? state.indicators.map((i) => INDICATOR_SHORT[i] ?? i).join(" vs. ")
+                  ? state.indicators
+                      .map((i) => INDICATOR_SHORT[i] ?? i)
+                      .join(" vs. ")
                   : "No indicator selected"}
                 {state.years.length === 1
                   ? ` · ${state.years[0]}`
                   : state.years.length > 1
-                  ? ` · ${Math.min(...state.years)}–${Math.max(...state.years)}`
-                  : ""}
+                    ? ` · ${Math.min(...state.years)}–${Math.max(...state.years)}`
+                    : ""}
               </p>
             </div>
             {chartNode}
             <p className="text-xs text-gray-400 mt-3">
-              Source: DHS Program · Rwanda Demographic and Health Surveys · 2005–2019 ·
-              All values are percentages (%).
+              Source: DHS Program · Rwanda Demographic and Health Surveys ·
+              2005–2019 · All values are percentages (%).
             </p>
           </div>
+
+          {/* Maps view */}
+          {mapData.length > 0 && (
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+              <div className="mb-4">
+                <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold mb-1">
+                  Province Map Visualization
+                </p>
+                <p className="text-sm text-gray-600 leading-snug">
+                  Interactive map showing{" "}
+                  {state.indicators.length > 0
+                    ? INDICATOR_SHORT[state.indicators[0]] ?? state.indicators[0]
+                    : "indicator values"}{" "}
+                  across Rwanda provinces
+                  {state.years.length === 1
+                    ? ` · ${state.years[0]}`
+                    : state.years.length > 1
+                      ? ` · ${Math.min(...state.years)}–${Math.max(...state.years)}`
+                      : ""}
+                </p>
+              </div>
+              
+              <RwandaProvinceMap 
+                data={mapData}
+                apiKey="AIzaSyDuIM9LDOFi0W8SmozMBi_B31OiCGiG78c"
+                title={
+                  state.indicators.length > 0
+                    ? INDICATOR_SHORT[state.indicators[0]] ?? state.indicators[0]
+                    : "Data Visualization"
+                }
+              />
+              
+              <p className="text-xs text-gray-400 mt-3">
+                Source: DHS Program · Rwanda Demographic and Health Surveys ·
+                2005–2019 · Click on province markers to see detailed values.
+              </p>
+            </div>
+          )}
 
           {/* Auto-insight */}
           {insight && (
