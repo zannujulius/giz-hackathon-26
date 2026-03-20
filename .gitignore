@@ -9,7 +9,7 @@ Data_for_Analytics/**/*.7z
 
 # Python
 venv/
-__pycache__/
+**/__pycache__/
 *.pyc
 *.pyo
 .Python
