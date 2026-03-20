@@ -84,6 +84,14 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
             </div>
           ),
         },
+        {
+          key: "3-3",
+          label: (
+            <div className="rounded">
+              <Link to="/insights_survey">Survey Analytics 2024</Link>
+            </div>
+          ),
+        },
       ],
     },
   ];
@@ -226,7 +234,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
             zIndex: 1,
           }}
         >
-          <Text className="font-bold text-md!">Welcome to the John</Text>
+          <Text className="font-bold text-md!">Welcome to the John Julius</Text>
           {/* <Link to="/chat" className="underline! cursor-pointer">
             Pregnancy and childbirth
           </Link> */}
