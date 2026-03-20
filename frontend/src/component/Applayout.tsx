@@ -261,7 +261,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
             zIndex: 1,
           }}
         >
-          <Text className="font-bold text-md!">Welcome to the John</Text>
+          <Text className="font-bold text-md!">Welcome to the John Julius</Text>
           {/* <Link to="/chat" className="underline! cursor-pointer">
             Pregnancy and childbirth
           </Link> */}
