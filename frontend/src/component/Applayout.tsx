@@ -83,6 +83,14 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
             </div>
           ),
         },
+        {
+          key: "3-3",
+          label: (
+            <div className="rounded">
+              <Link to="/insights_survey">Survey Analytics 2024</Link>
+            </div>
+          ),
+        },
       ],
     },
   ];

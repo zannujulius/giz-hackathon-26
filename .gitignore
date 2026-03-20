@@ -1,0 +1,42 @@
+# Large data files — never commit extracted survey data
+Data_for_Analytics/extracted/
+Data_for_Analytics/**/*.dta
+Data_for_Analytics/**/*.sav
+Data_for_Analytics/**/*.csv
+Data_for_Analytics/**/*.zip
+Data_for_Analytics/**/*.rar
+Data_for_Analytics/**/*.7z
+
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.Python
+*.egg-info/
+dist/
+build/
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+
+# Node / frontend
+node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# Analytics results (optional — remove this line if you want to commit results)
+# analytics/results/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
